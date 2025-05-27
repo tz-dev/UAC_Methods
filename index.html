@@ -20,760 +20,848 @@
 		<main>
 			<h2>1. Introduction</h2>
 			<section id="introduction">
-			  <p>
-			    In modern theoretical physics and applied numerical modeling, there is a growing need for modular, reusable computational tools that support efficient exploration and validation of physical systems. Many challenges, such as coupling unification, group symmetry branching, or field dynamics simulation, require flexible yet robust numerical strategies that are not limited to a single theoretical context.
-			  </p>
-			  <p>
-			    This work presents a curated set of numerically implemented algorithms that were originally developed within a generalized framework but are intentionally abstracted to support a wide range of independent applications. These tools include renormalization group solvers, topological invariant analysis, Lie algebra decompositions, entropy-based field inspection, and more.
-			  </p>
-			  <p>
-			    The goal is to provide a consistent, domain-agnostic toolbox for researchers aiming to conduct symbolic or numerical investigations into physical structure, parameter flow, and field behavior — without requiring alignment with any specific theoretical ontology.
-			  </p>
+				<p>
+					In modern theoretical physics and applied numerical modeling, there is a growing need for modular, reusable computational tools that support efficient exploration and validation of physical systems. Many challenges, such as coupling unification, group symmetry branching, or field dynamics simulation, require flexible yet robust numerical strategies that are not limited to a single theoretical context.
+				</p>
+				<p>
+					This work presents a curated set of numerically implemented algorithms that were originally developed within a generalized framework but are intentionally abstracted to support a wide range of independent applications. These tools include renormalization group solvers, topological invariant analysis, Lie algebra decompositions, entropy-based field inspection, and more.
+				</p>
+				<p>
+					The goal is to provide a consistent, domain-agnostic toolbox for researchers aiming to conduct symbolic or numerical investigations into physical structure, parameter flow, and field behavior — without requiring alignment with any specific theoretical ontology.
+				</p>
 			</section>
-
-			<h2>2. Renormalization and Coupling Flow Methods</h2>
+			<h2>2.1 Renormalization and Coupling Flow Methods</h2>
 			<section id="rgflow-ode-solver">
-			  <h3>2.1.1 RG Flow as ODE Solver</h3>
-			  <p>
-			    This method computes the 1-loop renormalization group (RG) evolution of the gauge couplings in the Minimal Supersymmetric Standard Model (MSSM) over a wide logarithmic energy range. It solves the beta-function equations of the form:
-			  </p>
-			  <p style="text-align: center;">
-			    \( \frac{1}{\alpha_i(\mu)} = \frac{1}{\alpha_i(\mu_0)} - \frac{b_i}{2\pi} \log\left( \frac{\mu}{\mu_0} \right) \)
-			  </p>
-			  <p>
-			    Here, \( \alpha_i \) represents the gauge couplings of the U(1), SU(2), and SU(3) symmetry groups, and \( b_i \) are the corresponding beta-function coefficients. The method identifies the energy scale \( \mu_{\text{unif}} \) where all three couplings approximately unify by minimizing the summed pairwise differences of their inverse values.
-			  </p>
-			  <p><strong>Features:</strong></p>
-			  <ul>
-			    <li>Purely numerical implementation (no symbolic algebra)</li>
-			    <li>Fast, interpretable, and plot-ready</li>
-			    <li>Useful for checking MSSM consistency and visualizing coupling convergence</li>
-			  </ul>
-			  <p><strong>Output:</strong></p>
-			  <ul>
-			    <li>Printed estimate of \( \mu_{\text{unif}} \) and unified coupling \( \alpha_{\text{unif}} \)</li>
-			    <li>High-quality plot: <code>mssm_gauge_coupling_unification.png</code></li>
-			  </ul>
-			  <p><strong>File:</strong></p>
-			  <ul>
-			    <li><a href="py/rgflow_ode_solver.py"><code>rgflow_ode_solver.py</code></a></li>
-			  </ul>
-			  <h3>2.1.2 Top Yukawa Flow & Yukawa Eigenvalue Evolution</h3>
-			  <p>
-			    This method numerically solves the 1-loop renormalization group (RG) evolution of the top Yukawa coupling \( y_t \) in the MSSM across a large energy range from \( \mu = 10^2 \) to \( 10^{17} \,\text{GeV} \). It incorporates the scale dependence of the gauge couplings \( g_1, g_2, g_3 \) into the beta function.
-			  </p>
-			  <p style="text-align: center;">
-			    \( \frac{dy_t}{d\ln\mu} = \frac{y_t}{16\pi^2} \left( \frac{9}{2} y_t^2 - \left( \frac{17}{20}g_1^2 + \frac{9}{4}g_2^2 + 8g_3^2 \right) \right) \)
-			  </p>
-			  <p>
-			    The differential equation is solved using a Runge–Kutta (RK45) integrator. The result shows the decrease of \( y_t \) with energy and estimates its value both at the electroweak scale (\( M_t = 173\,\text{GeV} \)) and at the unification scale (around \( 2 \times 10^{16}\,\text{GeV} \)).
-			  </p>
-			  <p><strong>Features:</strong></p>
-			  <ul>
-			    <li>Includes dynamically running gauge couplings in the Yukawa beta function</li>
-			    <li>Numerical integration via <code>solve_ivp</code> (SciPy)</li>
-			    <li>Suited for MSSM benchmark checks and parameter tuning</li>
-			  </ul>
-			  <p><strong>Output:</strong></p>
-			  <ul>
-			    <li>Printed values of \( y_t \) at the weak and GUT scales</li>
-			    <li>Plot saved as: <code>img/c4_2_top_yukawa_rg_flow.png</code></li>
-			  </ul>
-			  <p><strong>File:</strong></p>
-			  <ul>
-			    <li><a href="py/top_yukawa_flow.py"><code>top_yukawa_flow.py</code></a></li>
-			  </ul>
-			  <h3>2.1.3 RG Stability Landscape Mapping</h3>
-			  <p>
-			    This method analyzes the stability of the 1-loop renormalization group (RG) flow for the gauge couplings \( \alpha_i(\mu) \) in the Minimal Supersymmetric Standard Model (MSSM) over a large energy range from \( \mu = 10^2 \) to \( 10^{17} \,\text{GeV} \). It computes the RG evolution, calculates the derivatives to assess flow stability, and maps the coupling values at the Z boson mass scale (\( M_Z \approx 91.2 \,\text{GeV} \)).
-			  </p>
-			  <p style="text-align: center;">
-			    \( \frac{1}{\alpha_i(\mu)} = \frac{1}{\alpha_i(\mu_0)} - \frac{b_i}{2\pi} \log\left( \frac{\mu}{\mu_0} \right) \)
-			  </p>
-			  <p>
-			    Here, \( \alpha_i \) represents the gauge couplings for the U(1), SU(2), and SU(3) symmetry groups, with beta-function coefficients \( b_1 = 6.6 \), \( b_2 = 1.0 \), and \( b_3 = -3.0 \). The method evaluates the stability of the RG flow by computing the derivatives of \( \alpha_i(\mu) \) with respect to \( \log(\mu) \) and identifies the maximum slope of the flow.
-			  </p>
-			  <p><strong>Features:</strong></p>
-			  <ul>
-			    <li>Numerical computation of RG flow using NumPy for high precision</li>
-			    <li>Stability analysis through derivative calculations</li>
-			    <li>Visualization of coupling evolution and stability metrics</li>
-			  </ul>
-			  <p><strong>Output:</strong></p>
-			  <ul>
-			    <li>Printed values of \( \alpha_1(M_Z) \), \( \alpha_2(M_Z) \), and \( \alpha_3(M_Z) \)</li>
-			    <li>Maximum RG flow slope over the energy range</li>
-			    <li>Plot saved as: <code>rg_stability_mapping.png</code></li>
-			  </ul>
-			  <p><strong>File:</strong></p>
-			  <ul>
-			    <li><a href="py/rg_stability_landscape_mapping.py"><code>rg_stability_landscape_mapping.py</code></a></li>
-			  </ul>
+				<h3>2.1.1 RG Flow as ODE Solver</h3>
+				<p>
+					This method computes the 1-loop renormalization group (RG) evolution of the gauge couplings in the Minimal Supersymmetric Standard Model (MSSM) over a wide logarithmic energy range. It solves the beta-function equations of the form:
+				</p>
+				<p style="text-align: center;">
+					\( \frac{1}{\alpha_i(\mu)} = \frac{1}{\alpha_i(\mu_0)} - \frac{b_i}{2\pi} \log\left( \frac{\mu}{\mu_0} \right) \)
+				</p>
+				<p>
+					Here, \( \alpha_i \) represents the gauge couplings of the U(1), SU(2), and SU(3) symmetry groups, and \( b_i \) are the corresponding beta-function coefficients. The method identifies the energy scale \( \mu_{\text{unif}} \) where all three couplings approximately unify by minimizing the summed pairwise differences of their inverse values.
+				</p>
+				<p><strong>Features:</strong></p>
+				<ul>
+					<li>Purely numerical implementation (no symbolic algebra)</li>
+					<li>Fast, interpretable, and plot-ready</li>
+					<li>Useful for checking MSSM consistency and visualizing coupling convergence</li>
+				</ul>
+				<p><strong>Interactive Features:</strong></p>
+				<ul>
+					<li>Allows user input for initial inverse couplings (\( \alpha_1^{-1}, \alpha_2^{-1}, \alpha_3^{-1} \)) and beta coefficients (\( b_1, b_2, b_3 \)) to explore different unification scenarios.</li>
+				</ul>
+				<p><strong>Output:</strong></p>
+				<ul>
+					<li>Printed estimate of \( \mu_{\text{unif}} \) and unified coupling \( \alpha_{\text{unif}} \)</li>
+					<li>High-quality plot: <code>img/mssm_gauge_coupling_unification.png</code></li>
+				</ul>
+				<p><strong>File:</strong></p>
+				<ul>
+					<li><a href="py/rgflow_ode_solver.py"><code>rgflow_ode_solver.py</code></a></li>
+				</ul>
+				<h3>2.1.2 Renormalization Group Flow for Yukawa Couplings</h3>
+				<h4>2.1.2.1 Top Yukawa Flow</h4>
+				<p>
+					This method numerically solves the 1-loop renormalization group (RG) evolution of the top Yukawa coupling \( y_t \) in the MSSM across a large energy range from \( \mu = 10^2 \) to \( 10^{17} \,\text{GeV} \). It incorporates the scale dependence of the gauge couplings \( g_1, g_2, g_3 \) into the beta function.
+				</p>
+				<p style="text-align: center;">
+					\( \frac{dy_t}{d\ln\mu} = \frac{y_t}{16\pi^2} \left( \frac{9}{2} y_t^2 - \left( \frac{17}{20}g_1^2 + \frac{9}{4}g_2^2 + 8g_3^2 \right) \right) \)
+				</p>
+				<p>
+					The differential equation is solved using a Runge–Kutta (RK45) integrator. The result shows the decrease of \( y_t \) with energy and estimates its value both at the electroweak scale (\( M_t = 173\,\text{GeV} \)) and at the unification scale (around \( 2 \times 10^{16}\,\text{GeV} \)).
+				</p>
+				<p><strong>Features:</strong></p>
+				<ul>
+					<li>Includes dynamically running gauge couplings in the Yukawa beta function</li>
+					<li>Numerical integration via solve_ivp (SciPy)</li>
+					<li>Suited for MSSM benchmark checks and parameter tuning</li>
+				</ul>
+				<p><strong>Interactive Features:</strong></p>
+				<ul>
+					<li>Allows user input for the initial top Yukawa coupling (<code>y_t0</code>) and initial gauge couplings (<code>α₁, α₂, α₃</code>) to explore RG flow behavior in the MSSM. Default values: <code>y_t0 = 1.0</code>, <code>α₁ = 0.0169</code>, <code>α₂ = 0.0338</code>, <code>α₃ = 0.1184</code>.</li>
+				</ul>
+				<p><strong>Output:</strong></p>
+				<ul>
+					<li>Printed values of \( y_t \) at the weak and GUT scales: \( y_t(M_t = 173 \,\text{GeV}) = 0.935 \), \( y_t(\mu = 2.04 \times 10^{16} \,\text{GeV}) \approx 0.2238 \)</li>
+					<li>Plot saved as: <code>img/c4_2_top_yukawa_rg_flow.png</code></li>
+				</ul>
+				<p><strong>File:</strong></p>
+				<ul>
+					<li><a href="py/top_yukawa_flow.py"><code>top_yukawa_flow.py</code></a></li>
+				</ul>
+				<h4>2.1.2.2 Yukawa Matrix Eigenvalue Evolution</h4>
+				<p>
+					This method computes the renormalization group (RG) flow of the Yukawa matrix eigenvalues for up-type quarks in the MSSM at 1-loop level. Starting with a diagonal Yukawa matrix initialized with realistic quark couplings at the electroweak scale (\( \mu = 173 \,\text{GeV} \)), it integrates the simplified 1-loop RG equations over the energy range \( \mu = 10^2 \) to \( 10^{17} \,\text{GeV} \).
+				</p>
+				<p style="text-align: center;">
+					\( \frac{dY_{ii}}{d\ln\mu} = Y_{ii} \left( A - B y_i^2 \right), \quad A = 0.5, \quad B = \frac{4.5}{16\pi^2} \)
+				</p>
+				<p>
+					The eigenvalues of the Yukawa matrix are tracked to assess their evolution and stability at high energy scales, particularly at the grand unified theory (GUT) scale (\( \mu \approx 2.04 \times 10^{16} \,\text{GeV} \)).
+				</p>
+				<p><strong>Features:</strong></p>
+				<ul>
+					<li>Numerical integration of Yukawa matrix evolution using SciPy’s solve_ivp</li>
+					<li>Tracks eigenvalues of the Yukawa matrix for up-type quarks</li>
+					<li>Suitable for analyzing Yukawa coupling unification in MSSM</li>
+				</ul>
+				<p><strong>Interactive Features:</strong></p>
+				<ul>
+					<li>Allows user input for the diagonal elements of the initial Yukawa matrix (<code>Y0</code>) and RGE parameters (<code>A</code>, <code>B</code>) to explore eigenvalue evolution in the MSSM. Default values: <code>Y0 diagonal = [0.01, 0.04, 0.99]</code>, <code>A = 0.5</code>, <code>B = 0.01797</code>.</li>
+				</ul>
+				<p><strong>Output:</strong></p>
+				<ul>
+					<li>Printed eigenvalues at the GUT scale: \( \lambda_1 \approx 4.1463 \), \( \lambda_2 \approx 4.1888 \), \( \lambda_3 \approx 4.1888 \) at \( \mu = 2.04 \times 10^{16} \,\text{GeV} \)</li>
+					<li>Plot of eigenvalue evolution saved as: <code>img/yukawa_matrix_eigenflow.png</code></li>
+				</ul>
+				<p><strong>File:</strong></p>
+				<ul>
+					<li><a href="py/yukawa_matrix_eigenflow.py"><code>yukawa_matrix_eigenflow.py</code></a></li>
+				</ul>
+				<h3>2.1.3 RG Stability Landscape Mapping</h3>
+				<p>
+					This method analyzes the stability of the 1-loop renormalization group (RG) flow for the gauge couplings \( \alpha_i(\mu) \) in the Minimal Supersymmetric Standard Model (MSSM) over a large energy range from \( \mu = 10^2 \) to \( 10^{17} \,\text{GeV} \). It computes the RG evolution, calculates the derivatives to assess flow stability, and maps the coupling values at the Z boson mass scale (\( M_Z \approx 91.2 \,\text{GeV} \)).
+				</p>
+				<p style="text-align: center;">
+					\( \frac{1}{\alpha_i(\mu)} = \frac{1}{\alpha_i(\mu_0)} - \frac{b_i}{2\pi} \log\left( \frac{\mu}{\mu_0} \right) \)
+				</p>
+				<p>
+					Here, \( \alpha_i \) represents the gauge couplings for the U(1), SU(2), and SU(3) symmetry groups, with beta-function coefficients \( b_1 = 6.6 \), \( b_2 = 1.0 \), and \( b_3 = -3.0 \). The method evaluates the stability of the RG flow by computing the derivatives of \( \alpha_i(\mu) \) with respect to \( \log(\mu) \) and identifies the maximum slope of the flow.
+				</p>
+				<p><strong>Features:</strong></p>
+				<ul>
+					<li>Numerical computation of RG flow using NumPy for high precision</li>
+					<li>Stability analysis through derivative calculations</li>
+					<li>Visualization of coupling evolution and stability metrics</li>
+				</ul>
+				<p><strong>Interactive Features:</strong></p>
+				<ul>
+					<li>Allows user input for initial inverse couplings (<code>α_1⁻¹, α_2⁻¹, α_3⁻¹</code>) and beta coefficients (<code>b_1, b_2, b_3</code>) to explore RG flow stability and unification scenarios. Default values: <code>α_1⁻¹ = 59.0</code>, <code>α_2⁻¹ = 29.6</code>, <code>α_3⁻¹ = 8.5</code>, <code>b_1 = 6.6</code>, <code>b_2 = 1.0</code>, <code>b_3 = -3.0</code>.</li>
+				</ul>
+				<p><strong>Output:</strong></p>
+				<ul>
+					<li>Printed values of \( \alpha_1(M_Z) \), \( \alpha_2(M_Z) \), and \( \alpha_3(M_Z) \)</li>
+					<li>Maximum RG flow slope over the energy range</li>
+					<li>Plot saved as: <code>img/rg_stability_mapping.png</code></li>
+				</ul>
+				<p><strong>File:</strong></p>
+				<ul>
+					<li><a href="py/rg_stability_landscape_mapping.py"><code>rg_stability_landscape_mapping.py</code></a></li>
+				</ul>
 			</section>
-
 			<h2>2.2 Symmetry and Group Analysis</h2>
 			<section id="lie-group-branching">
-			  <h3>2.2.1 E8 Branching to Standard Model Gauge Groups</h3>
-			  <p>
-			    This method validates the dimensional consistency of the stepwise subgroup decomposition of the exceptional Lie group E8 down to the Standard Model gauge groups SU(3) × SU(2) × U(1). The decomposition follows the chain E8 → E6 → SO(10) → SU(5) → SU(3) × SU(2) × U(1), checking the dimensions of each group and the multiplet breakdowns at key stages.
-			  </p>
-			  <p>
-			    The dimensions of the adjoint representations are tracked as follows:
-			  </p>
-			  <p style="text-align: center;">
-			    \( \text{E8} (248) \to \text{E6} (78) \to \text{SO}(10) (45) \to \text{SU}(5) (24) \to \text{SU}(3) \times \text{SU}(2) \times \text{U}(1) (8 + 3 + 1) \)
-			  </p>
-			  <p>
-			    The method also verifies the multiplet decomposition, ensuring that the dimensions of the resulting representations align with theoretical expectations, including additional singlets and multiplets at the E6 level.
-			  </p>
-			  <p><strong>Features:</strong></p>
-			  <ul>
-			    <li>Stepwise validation of Lie group dimensions</li>
-			    <li>Multiplet breakdown checks for consistency with Standard Model gauge groups</li>
-			    <li>Simple, interpretable output for theoretical validation</li>
-			  </ul>
-			  <p><strong>Output:</strong></p>
-			  <ul>
-			    <li>Printed dimension counts for each group in the decomposition chain</li>
-			    <li>Printed multiplet breakdown for key stages, including E6 and Standard Model</li>
-			  </ul>
-			  <p><strong>File:</strong></p>
-			  <ul>
-			    <li><a href="py/lie_group_branching_e8_su321.py"><code>lie_group_branching_e8_su321.py</code></a></li>
-			  </ul>
-			  <h3>2.2.2 Entropy-Based SUSY Mass Splitting</h3>
-			  <p>
-			    This method simulates mass splitting in a supersymmetric (SUSY) framework using an entropy-based projection mechanism. It models the mass variation of particles relative to a base mass (electron mass, \( m_e = 9.10938356 \times 10^{-31} \,\text{kg} \)) by introducing an entropic scaling factor \( \alpha_S = 0.015 \), a projection frequency \( \omega = \pi \), and a phase offset \( \theta = \pi/4 \). The entropy samples are drawn from a normal distribution with mean \( S_{\text{mean}} = 2.74309 \) and standard deviation \( S_{\sigma} = 0.05894 \).
-			  </p>
-			  <p>
-			    The mass splitting is computed as:
-			  </p>
-			  <p style="text-align: center;">
-			    \( \Delta m = \frac{\alpha_S |\Delta S| k_B}{c^2} \)
-			  </p>
-			  <p>
-			    where \( \Delta S \) is the entropy fluctuation, \( k_B \) is the Boltzmann constant, and \( c \) is the speed of light. The projection mask \( \text{sign}(\cos(\omega S + \theta)) \) determines whether particles are assigned to the Standard Model (SM) or SUSY sector, resulting in masses \( m_{\text{SM}} = m_{\text{base}} + \Delta m \) and \( m_{\text{SUSY}} = m_{\text{base}} - \Delta m \).
-			  </p>
-			  <p><strong>Features:</strong></p>
-			  <ul>
-			    <li>Entropy-driven mass splitting with supersymmetric projection</li>
-			    <li>Statistical simulation using 10,000 samples for robust distributions</li>
-			    <li>Visualization of mass histograms and projection states</li>
-			  </ul>
-			  <p><strong>Output:</strong></p>
-			  <ul>
-			    <li>Printed mean masses for visible (SM) and hidden (SUSY) sectors</li>
-			    <li>Printed mean mass splitting \( \Delta m \)</li>
-			    <li>Histogram plot saved as: <code>img/c2_3_supersym_mass_histogram.png</code></li>
-			    <li>Projection state plot saved as: <code>img/c2_3_supersym_projection_mask.png</code></li>
-			  </ul>
-			  <p><strong>File:</strong></p>
-			  <ul>
-			    <li><a href="py/susy_parameter_variation.py"><code>susy_parameter_variation.py</code></a></li>
-			  </ul>
+				<h3>2.2.1 E8 Branching to Standard Model Gauge Groups</h3>
+				<p>
+					This method validates the dimensional consistency of the stepwise subgroup decomposition of the exceptional Lie group E8 down to the Standard Model gauge groups SU(3) × SU(2) × U(1). The decomposition follows the chain E8 → E6 → SO(10) → SU(5) → SU(3) × SU(2) × U(1), checking the dimensions of each group and the multiplet breakdowns at key stages.
+				</p>
+				<p>
+					The dimensions of the adjoint representations are tracked as follows:
+				</p>
+				<p style="text-align: center;">
+					\( \text{E8} (248) \to \text{E6} (78) \to \text{SO}(10) (45) \to \text{SU}(5) (24) \to \text{SU}(3) \times \text{SU}(2) \times \text{U}(1) (8 + 3 + 1) \)
+				</p>
+				<p>
+					The method also verifies the multiplet decomposition, ensuring that the dimensions of the resulting representations align with theoretical expectations, including additional singlets and multiplets at the E6 level.
+				</p>
+				<p><strong>Features:</strong></p>
+				<ul>
+					<li>Stepwise validation of Lie group dimensions</li>
+					<li>Multiplet breakdown checks for consistency with Standard Model gauge groups</li>
+					<li>Simple, interpretable output for theoretical validation</li>
+				</ul>
+				<p><strong>Output:</strong></p>
+				<ul>
+					<li>Printed dimension counts for each group in the decomposition chain</li>
+					<li>Printed multiplet breakdown for key stages, including E6 and Standard Model</li>
+				</ul>
+				<p><strong>File:</strong></p>
+				<ul>
+					<li><a href="py/lie_group_branching_e8_su321.py"><code>lie_group_branching_e8_su321.py</code></a></li>
+				</ul>
+				<h3>2.2.2 Entropy-Based SUSY Mass Splitting</h3>
+				<p>
+					This method simulates mass splitting in a supersymmetric (SUSY) framework using an entropy-based projection mechanism. It models the mass variation of particles relative to a base mass (electron mass, \( m_e = 9.10938356 \times 10^{-31} \,\text{kg} \)) by introducing an entropic scaling factor \( \alpha_S = 0.015 \), a projection frequency \( \omega = \pi \), and a phase offset \( \theta = \pi/4 \). The entropy samples are drawn from a normal distribution with mean \( S_{\text{mean}} = 2.74309 \) and standard deviation \( S_{\sigma} = 0.05894 \).
+				</p>
+				<p>
+					The mass splitting is computed as:
+				</p>
+				<p style="text-align: center;">
+					\( \Delta m = \frac{\alpha_S |\Delta S| k_B}{c^2} \)
+				</p>
+				<p>
+					where \( \Delta S \) is the entropy fluctuation, \( k_B \) is the Boltzmann constant, and \( c \) is the speed of light. The projection mask \( \text{sign}(\cos(\omega S + \theta)) \) determines whether particles are assigned to the Standard Model (SM) or SUSY sector, resulting in masses \( m_{\text{SM}} = m_{\text{base}} + \Delta m \) and \( m_{\text{SUSY}} = m_{\text{base}} - \Delta m \).
+				</p>
+				<p><strong>Features:</strong></p>
+				<ul>
+					<li>Entropy-driven mass splitting with supersymmetric projection</li>
+					<li>Statistical simulation using 10,000 samples for robust distributions</li>
+					<li>Visualization of mass histograms and projection states</li>
+				</ul>
+				<p><strong>Interactive Features:</strong></p>
+				<ul>
+					<li>Allows user input for scaling factor (<code>alpha_S</code>), frequency (<code>omega</code>), phase (<code>theta</code>), and number of samples (<code>N</code>) to simulate SUSY mass splitting scenarios. Default values: <code>alpha_S = 0.1</code>, <code>omega = 0.5</code>, <code>theta = 0.0</code>, <code>N = 10000</code>.</li>
+				</ul>
+				<p><strong>Output:</strong></p>
+				<ul>
+					<li>Printed mean masses for visible (SM) and hidden (SUSY) sectors</li>
+					<li>Printed mean mass splitting \( \Delta m \)</li>
+					<li>Histogram plot saved as: <code>img/c2_3_supersym_mass_histogram.png</code></li>
+					<li>Projection state plot saved as: <code>img/c2_3_supersym_projection_mask.png</code></li>
+				</ul>
+				<p><strong>File:</strong></p>
+				<ul>
+					<li><a href="py/susy_parameter_variation.py"><code>susy_parameter_variation.py</code></a></li>
+				</ul>
 			</section>
-
 			<h2>2.3 Topological and Geometric Field Analysis</h2>
 			<section id="topological-invariant-testing">
-			  <h3>2.3.1 Topological Invariant Testing</h3>
-			  <p>
-			    This method tests topological protection in physical systems by analyzing the stability of stochastic Hessian matrices with a signature of (1+, 3−). It generates \( N = 10,000 \) random Hessian matrices using a QR decomposition to ensure orthogonality, with eigenvalues perturbed by Gaussian noise. The determinant and trace of each Hessian are computed to probe topological stability and entropic divergence, respectively.
-			  </p>
-			  <p>
-			    The Hessian matrix \( H \) is constructed as \( H = Q \cdot \text{diag}(\lambda_i) \cdot Q^T \), where \( \lambda_i = [1, -1, -2, -3] + \mathcal{N}(0, 0.2) \) are the eigenvalues, and \( Q \) is an orthogonal matrix from QR decomposition. The determinant \( \det(H) \) indicates topological stability, while the trace \( \text{Tr}(H) \) approximates entropic divergence.
-			  </p>
-			  <p><strong>Features:</strong></p>
-			  <ul>
-			    <li>Generation of stochastic Hessian matrices with controlled eigenvalue signatures</li>
-			    <li>Statistical analysis of determinant and trace for topological protection</li>
-			    <li>High-sample Monte Carlo approach for robust statistics</li>
-			  </ul>
-			  <p><strong>Output:</strong></p>
-			  <ul>
-			    <li>Printed statistics: number and percentage of non-zero Hessian determinants (\( |\det(H)| > 10^{-12} \))</li>
-			    <li>Printed statistics: number and percentage of stable entropic divergences (\( |\text{Tr}(H)| < 10 \))</li>
-			  </ul>
-			  <p><strong>File:</strong></p>
-			  <ul>
-			    <li><a href="py/topological_invariant_testing.py"><code>topological_invariant_testing.py</code></a></li>
-			  </ul>
-			  <h3>2.3.2 Lorentz Signature Detection</h3>
-			  <p>
-			    This method analyzes the Hessian matrix of an entropy function \( S(x) \) to detect emergent Lorentzian spacetime signatures in a 4-dimensional system. It computes 4×4 Hessian matrices at \( N = 1,000 \) random points, evaluating the eigenvalue signatures to identify the distribution of positive and negative eigenvalues, which indicate the metric structure (e.g., (1+, 3−) for Lorentzian).
-			  </p>
-			  <p>
-			    The entropy function is defined as:
-			  </p>
-			  <p style="text-align: center;">
-			    \( S(x) = e^{\tau} - 1 + 0.01 \sin(2\pi x_0) + 0.01 \cos(2\pi x_1) + 0.01 \sin(2\pi x_2) + 0.01 \cos(2\pi x_3) \)
-			  </p>
-			  <p>
-			    where \( \tau = 5.99 \). The Hessian is computed numerically using finite differences, and its eigenvalues are analyzed to determine the signature. The method tracks the frequency of each signature and the distribution of eigenvalues.
-			  </p>
-			  <p><strong>Features:</strong></p>
-			  <ul>
-			    <li>Numerical computation of 4×4 Hessian matrices for entropy function</li>
-			    <li>Eigenvalue analysis to detect Lorentzian (1+, 3−) signatures</li>
-			    <li>Statistical sampling over 1,000 random points for robust distribution</li>
-			  </ul>
-			  <p><strong>Output:</strong></p>
-			  <ul>
-			    <li>Printed signature distribution (e.g., (1+, 3−), (2+, 2−)) with occurrence percentages</li>
-			    <li>Eigenvalue histogram saved as: <code>img/c2_5_entropy_hessian_lorentz_signature.png</code></li>
-			  </ul>
-			  <p><strong>File:</strong></p>
-			  <ul>
-			    <li><a href="py/lorentz_signature_detection.py"><code>lorentz_signature_detection.py</code></a></li>
-			  </ul>
-			  <h3>2.3.3 Discrete Curvature Projection</h3>
-			  <p>
-			    This method derives the Einstein tensor \( G_{\mu\nu} \) from an entropy-derived metric \( g_{\mu\nu} \) by computing the Hessian of an entropy function \( S(x^\mu) \). The entropy function is defined in a 4-dimensional coordinate system \( (t, x, y, z) \), and the metric is obtained as the Hessian \( g_{\mu\nu} = \frac{\partial^2 S}{\partial x^\mu \partial x^\nu} \). The method calculates the Christoffel symbols \( \Gamma^\lambda_{\mu\nu} \), Riemann curvature tensor \( R^\rho_{\sigma\mu\nu} \), Ricci tensor \( R_{\mu\nu} \), Ricci scalar \( R \), and finally the Einstein tensor:
-			  </p>
-			  <p style="text-align: center;">
-			    \( G_{\mu\nu} = R_{\mu\nu} - \frac{1}{2} R g_{\mu\nu} \)
-			  </p>
-			  <p>
-			    The entropy function is given by:
-			  </p>
-			  <p style="text-align: center;">
-			    \( S(t, x, y, z) = e^t + \sin^2(x) + \cos(y) + z^2 \)
-			  </p>
-			  <p>
-			    Symbolic computations are performed using SymPy to ensure analytical precision in deriving the curvature components.
-			  </p>
-			  <p><strong>Features:</strong></p>
-			  <ul>
-			    <li>Symbolic derivation of the metric from the entropy function's Hessian</li>
-			    <li>Computation of Christoffel symbols, Riemann, Ricci, and Einstein tensors</li>
-			    <li>Simplified output for theoretical analysis of emergent spacetime geometry</li>
-			  </ul>
-			  <p><strong>Output:</strong></p>
-			  <ul>
-			    <li>Printed symbolic Einstein tensor \( G_{\mu\nu} \)</li>
-			  </ul>
-			  <p><strong>File:</strong></p>
-			  <ul>
-			    <li><a href="py/discrete_curvature_projection.py"><code>discrete_curvature_projection.py</code></a></li>
-			  </ul>
+				<h3>2.3.1 Topological Invariant Testing</h3>
+				<p>
+					This method tests topological protection in physical systems by analyzing the stability of stochastic Hessian matrices with a signature of (1+, 3−). It generates \( N = 10,000 \) random Hessian matrices using a QR decomposition to ensure orthogonality, with eigenvalues perturbed by Gaussian noise. The determinant and trace of each Hessian are computed to probe topological stability and entropic divergence, respectively.
+				</p>
+				<p>
+					The Hessian matrix \( H \) is constructed as \( H = Q \cdot \text{diag}(\lambda_i) \cdot Q^T \), where \( \lambda_i = [1, -1, -2, -3] + \mathcal{N}(0, 0.2) \) are the eigenvalues, and \( Q \) is an orthogonal matrix from QR decomposition. The determinant \( \det(H) \) indicates topological stability, while the trace \( \text{Tr}(H) \) approximates entropic divergence.
+				</p>
+				<p><strong>Features:</strong></p>
+				<ul>
+					<li>Generation of stochastic Hessian matrices with controlled eigenvalue signatures</li>
+					<li>Statistical analysis of determinant and trace for topological protection</li>
+					<li>High-sample Monte Carlo approach for robust statistics</li>
+				</ul>
+				<p><strong>Interactive Features:</strong></p>
+				<ul>
+					<li>Allows users input for the number of Hessian samples (<code>N_samples</code>) samples and eigenvalue scaling factor (<code>ev</code>) to analyze topological invariant statistics. Default values: <code>N_samples = 1000</code>, <code>ev = 0.1</code>.0</code>.</li>
+				</ul>
+				<p><strong>Output:</strong></p>
+				<ul>
+					<li>Printed statistics: number and percentage of non-zero Hessian determinants (\( |\det(H)| > 10^{-12} \))</li>
+					<li>Printed statistics: number and percentage of stable entropic divergences (\( |\text{Tr}(H)| < 10 \))</li>
+				</ul>
+				<p><strong>File:</strong></p>
+				<ul>
+					<li><a href="py/topological_invariant_testing.py"><code>img/topological_invariant_testing.py</code></a></li>
+				</ul>
+				<h3>2.3.2 Lorentz Signature Detection</h3>
+				<p>
+					This method analyzes the Hessian matrix of an entropy function \( S(x) \) to detect emergent Lorentzian spacetime signatures in a 4-dimensional system. It computes 4×4 Hessian matrices at \( N = 1,000 \) random points, evaluating the eigenvalue signatures to identify the distribution of positive and negative eigenvalues, which indicate the metric structure (e.g., (1+, 3−) for Lorentzian).
+				</p>
+				<p>
+					The entropy function is defined as:
+				</p>
+				<p style="text-align: center;">
+					\( S(x) = e^{\tau} - 1 + 0.01 \sin(2\pi x_0) + 0.01 \cos(2\pi x_1) + 0.01 \sin(2\pi x_2) + 0.01 \cos(2\pi x_3) \)
+				</p>
+				<p>
+					where \( \tau = 5.99 \). The Hessian is computed numerically using finite differences, and its eigenvalues are analyzed to determine the signature. The method tracks the frequency of each signature and the distribution of eigenvalues.
+				</p>
+				<p><strong>Features:</strong></p>
+				<ul>
+					<li>Numerical computation of 4×4 Hessian matrices for entropy function</li>
+					<li>Eigenvalue analysis to detect Lorentzian (1+, 3−) signatures</li>
+					<li>Statistical sampling over 1,000 random points for robust distribution</li>
+				</ul>
+				<p><strong>Interactive Features:</strong></p>
+				<ul>
+					<li>Allows user input for the number of Hessian samples (<code>N_samples</code>) and meta-time scale (<code>tau</code>) to analyze Lorentz signature statistics. Default values: <code>N_samples = 1000</code>, <code>tau = 5.391e-44 s</code>.</li>
+				</ul>
+				<p><strong>Output:</strong></p>
+				<ul>
+					<li>Printed signature distribution (e.g., (1+, 3−), (2+, 2−)) with occurrence percentages</li>
+					<li>Eigenvalue histogram saved as: <code>img/c2_5_entropy_hessian_lorentz_signature.png</code></li>
+				</ul>
+				<p><strong>File:</strong></p>
+				<ul>
+					<li><a href="py/lorentz_signature_detection.py"><code>lorentz_signature_detection.py</code></a></li>
+				</ul>
+				<h3>2.3.3 Discrete Curvature Projection</h3>
+				<p>
+					This method derives the Einstein tensor \( G_{\mu\nu} \) from an entropy-derived metric \( g_{\mu\nu} \) by computing the Hessian of an entropy function \( S(x^\mu) \). The entropy function is defined in a 4-dimensional coordinate system \( (t, x, y, z) \), and the metric is obtained as the Hessian \( g_{\mu\nu} = \frac{\partial^2 S}{\partial x^\mu \partial x^\nu} \). The method calculates the Christoffel symbols \( \Gamma^\lambda_{\mu\nu} \), Riemann curvature tensor \( R^\rho_{\sigma\mu\nu} \), Ricci tensor \( R_{\mu\nu} \), Ricci scalar \( R \), and finally the Einstein tensor:
+				</p>
+				<p style="text-align: center;">
+					\( G_{\mu\nu} = R_{\mu\nu} - \frac{1}{2} R g_{\mu\nu} \)
+				</p>
+				<p>
+					The entropy function is given by:
+				</p>
+				<p style="text-align: center;">
+					\( S(t, x, y, z) = e^t + \sin^2(x) + \cos(y) + z^2 \)
+				</p>
+				<p>
+					Symbolic computations are performed using SymPy to ensure analytical precision in deriving the curvature components.
+				</p>
+				<p><strong>Features:</strong></p>
+				<ul>
+					<li>Symbolic derivation of the metric from the entropy function's Hessian</li>
+					<li>Computation of Christoffel symbols, Riemann, Ricci, and Einstein tensors</li>
+					<li>Simplified output for theoretical analysis of emergent spacetime geometry</li>
+				</ul>
+				<p><strong>Output:</strong></p>
+				<ul>
+					<li>Printed symbolic Einstein tensor \( G_{\mu\nu} \)</li>
+				</ul>
+				<p><strong>File:</strong></p>
+				<ul>
+					<li><a href="py/discrete_curvature_projection.py"><code>discrete_curvature_projection.py</code></a></li>
+				</ul>
 			</section>
-
 			<h2>2.4 Numerical and Statistical Simulations</h2>
 			<section id="montecarlo-entropic-lensing">
-			  <h3>2.4.1 Entropic Lensing via Monte Carlo Sampling</h3>
-			  <p>
-			    This method simulates the entropic lensing effect by performing Monte Carlo sampling of a 2D entropy gradient field. It generates \( N = 1,000,000 \) random points in the domain \( [-1, 1]^2 \), defines an entropy field \( S(\mathbf{r}) = e^{-r^2} \) centered at the origin, and computes the numerical gradient to approximate light ray directions. The gradient vectors are normalized to determine the direction of lensing rays, and the deviation angles are calculated to analyze the lensing effect.
-			  </p>
-			  <p>
-			    The entropy field and its gradient are given by:
-			  </p>
-			  <p style="text-align: center;">
-			    \( S(\mathbf{r}) = e^{-r^2}, \quad \nabla S = \left( \frac{\partial S}{\partial x}, \frac{\partial S}{\partial y} \right) = \left( -2x e^{-r^2}, -2y e^{-r^2} \right) \)
-			  </p>
-			  <p>
-			    The deviation angle \( \theta \) is computed as \( \theta = \arctan2\left( \frac{\partial S / \partial y}{\|\nabla S\|}, \frac{\partial S / \partial x}{\|\nabla S\|} \right) \), converted to degrees for statistical analysis.
-			  </p>
-			  <p><strong>Features:</strong></p>
-			  <ul>
-			    <li>Monte Carlo sampling with 1,000,000 points for high statistical accuracy</li>
-			    <li>Numerical gradient computation for entropy-driven lensing</li>
-			    <li>Visualization of normalized gradient vectors as lensing rays</li>
-			  </ul>
-			  <p><strong>Output:</strong></p>
-			  <ul>
-			    <li>Printed mean and standard deviation of deviation angles in degrees</li>
-			    <li>Quiver plot of lensing rays saved as: <code>img/c7_1_entropic_lensing_rays.png</code></li>
-			  </ul>
-			  <p><strong>File:</strong></p>
-			  <ul>
-			    <li><a href="py/montecarlo_structural_simulation.py"><code>montecarlo_structural_simulation.py</code></a></li>
-			  </ul>
-			  <h3>2.4.2 Cosmological Constant Estimation from Flow Data</h3>
-			  <p>
-			    This method estimates the cosmological constant \( \Lambda \) using entropic flow data and a projected Hubble constant. Two approaches are implemented: (1) deriving \( \Lambda \) from a projected Hubble constant \( H_0^{\text{proj}} \), and (2) projecting \( H_0 \) from an entropic flow rate and scaling factor, followed by a comparison with the official cosmological constant \( \Lambda_{\text{official}} \).
-			  </p>			  
-			  <h4>2.4.2.1 Cosmological Constant from Projected Hubble Constant</h4>
-			  <p>
-			    The first approach calculates \( \Lambda \) using the relation:
-			  </p>
-			  <p style="text-align: center;">
-			    \( \Lambda = \frac{3 {H_0^{\text{proj}}}^2}{c^2} \)
-			  </p>
-			  <p>
-			    where \( H_0^{\text{proj}} = 2.26908425 \times 10^{-18} \,\text{s}^{-1} \) is the projected Hubble constant, and \( c \) is the speed of light. The result is compared to the official value \( \Lambda_{\text{official}} = 1.1056 \times 10^{-52} \,\text{m}^{-2} \).
-			  </p>
-			  <p><strong>Features:</strong></p>
-			  <ul>
-			    <li>Direct computation of \( \Lambda \) from a projected Hubble constant</li>
-			    <li>Comparison with the official cosmological constant</li>
-			    <li>Relative deviation calculation for validation</li>
-			  </ul>
-			  <p><strong>Output:</strong></p>
-			  <ul>
-			    <li>Printed \( \Lambda_{\text{proj}} \) and \( \Lambda_{\text{official}} \) in \( \text{m}^{-2} \)</li>
-			    <li>Printed relative deviation in percentage</li>
-			  </ul>
-			  <p><strong>File:</strong></p>
-			  <ul>
-			    <li><a href="py/cosmo_constant_from_hubble_flow.py"><code>cosmo_constant_from_hubble_flow.py</code></a></li>
-			  </ul>
-			  <h4>2.4.2.2 Hubble Constant from Entropic Projection</h4>
-			  <p>
-			    The second approach projects the Hubble constant \( H_0^{\text{proj}} \) from an entropic flow rate and a scaling factor. The entropic flow rate is defined as \( \dot{S} = \frac{k_B}{\tau} \), where \( k_B = 1.380648 \times 10^{-23} \,\text{J/K} \) is the Boltzmann constant and \( \tau = 4.35 \times 10^{17} \,\text{s} \) is the entropic timescale (set to the universe's age). The entropic volume scale is \( V = c^3 t_{\text{universe}}^2 \), and the projected Hubble constant is computed as:
-			  </p>
-			  <p style="text-align: center;">
-			    \( H_0^{\text{proj}} = \frac{\dot{S}}{V} \cdot \beta_H \)
-			  </p>
-			  <p>
-			    where \( \beta_H = 3.645 \times 10^{83} \) is a dimensionless scaling factor. The result is compared to the official Hubble constant \( H_0^{\text{official}} = 2.26854594 \times 10^{-18} \,\text{s}^{-1} \).
-			  </p>
-			  <p><strong>Features:</strong></p>
-			  <ul>
-			    <li>Entropic projection of the Hubble constant using physical constants</li>
-			    <li>Incorporation of a tuned scaling factor \( \beta_H \)</li>
-			    <li>Relative deviation analysis against the official Hubble constant</li>
-			  </ul>
-			  <p><strong>Output:</strong></p>
-			  <ul>
-			    <li>Printed \( \tau \), \( \dot{S} \), \( V \), \( H_0^{\text{proj}} \), and \( H_0^{\text{official}} \)</li>
-			    <li>Printed relative deviation in percentage</li>
-			  </ul>
-			  <p><strong>File:</strong></p>
-			  <ul>
-			    <li><a href="py/hubble_constant_from_entropy.py"><code>hubble_constant_from_entropy.py</code></a></li>
-			  </ul>
-			  <h3>2.4.3 Projection of Physical Constants</h3>
-			  <p>
-			    This section presents methods to project fundamental physical constants using derived or assumed values, comparing them with their official values to assess accuracy. The methods include calculations of the Thomson scattering cross section, Compton wavelength, Avogadro's number, and the atomic mass unit, each using projected physical constants such as the fine-structure constant, electron mass, and speed of light.
-			  </p>
-
-			  <h4>2.4.3.1 Thomson Cross Section Projection</h4>
-			  <p>
-			    This method calculates the Thomson scattering cross section \( \sigma_T \) using projected constants:
-			  </p>
-			  <p style="text-align: center;">
-			    \( \sigma_T = \frac{8\pi}{3} \left( \frac{\alpha \hbar}{m_e c} \right)^2 \)
-			  </p>
-			  <p>
-			    where \( \alpha = 1/137.035999084 \) (fine-structure constant), \( \hbar = 1.054571817 \times 10^{-34} \,\text{J·s} \) (reduced Planck constant), \( m_e = 9.116693 \times 10^{-31} \,\text{kg} \) (electron mass), and \( c = 2.99758857 \times 10^8 \,\text{m/s} \) (speed of light). The result is compared to the official value \( \sigma_T^{\text{official}} = 6.6524587158 \times 10^{-29} \,\text{m}^2 \).
-			  </p>
-			  <p><strong>Features:</strong></p>
-			  <ul>
-			    <li>Uses projected fundamental constants for Thomson scattering</li>
-			    <li>Direct analytical computation of \( \sigma_T \)</li>
-			    <li>Relative deviation analysis against the official value</li>
-			  </ul>
-			  <p><strong>Output:</strong></p>
-			  <ul>
-			    <li>Printed projected and official \( \sigma_T \) in \( \text{m}^2 \)</li>
-			    <li>Printed relative deviation in percentage</li>
-			  </ul>
-			  <p><strong>File:</strong></p>
-			  <ul>
-			    <li><a href="py/thomson_cross_section_projection.py"><code>thomson_cross_section_projection.py</code></a></li>
-			  </ul>
-
-			  <h4>2.4.3.2 Compton Wavelength Projection</h4>
-			  <p>
-			    This method calculates the Compton wavelength \( \lambda_C \) of the electron using the full Planck constant \( h = 2\pi \hbar \), with:
-			  </p>
-			  <p style="text-align: center;">
-			    \( \lambda_C = \frac{h}{m_e c} \)
-			  </p>
-			  <p>
-			    where \( \hbar = 1.054571817 \times 10^{-34} \,\text{J·s} \), \( m_e = 9.116693 \times 10^{-31} \,\text{kg} \), and \( c = 2.99758857 \times 10^8 \,\text{m/s} \). The result is compared to the official value \( \lambda_C^{\text{official}} = 2.42631023867 \times 10^{-12} \,\text{m} \).
-			  </p>
-			  <p><strong>Features:</strong></p>
-			  <ul>
-			    <li>Derivation of full Planck constant from projected \( \hbar \)</li>
-			    <li>Analytical computation of Compton wavelength</li>
-			    <li>Relative deviation analysis against the official value</li>
-			  </ul>
-			  <p><strong>Output:</strong></p>
-			  <ul>
-			    <li>Printed projected and official \( \lambda_C \) in meters</li>
-			    <li>Printed relative deviation in percentage</li>
-			  </ul>
-			  <p><strong>File:</strong></p>
-			  <ul>
-			    <li><a href="py/compton_wavelength_projection.py"><code>compton_wavelength_projection.py</code></a></li>
-			  </ul>
-
-			  <h4>2.4.3.3 Avogadro Constant Projection</h4>
-			  <p>
-			    This method estimates Avogadro's number \( N_A \) from a projected atomic mass unit:
-			  </p>
-			  <p style="text-align: center;">
-			    \( N_A = \frac{1 \,\text{g}}{m_u} \)
-			  </p>
-			  <p>
-			    where \( m_u = 1.66053906660 \times 10^{-27} \,\text{kg} \) is the projected atomic mass unit, and 1 gram is \( 10^{-3} \,\text{kg} \). The result is compared to the official value \( N_A^{\text{official}} = 6.02214076 \times 10^{23} \).
-			  </p>
-			  <p><strong>Features:</strong></p>
-			  <ul>
-			    <li>Simple scaling from projected atomic mass unit</li>
-			    <li>Direct computation of Avogadro's number</li>
-			    <li>Relative deviation analysis against the official value</li>
-			  </ul>
-			  <p><strong>Output:</strong></p>
-			  <ul>
-			    <li>Printed projected and official \( N_A \)</li>
-			    <li>Printed relative deviation in percentage</li>
-			  </ul>
-			  <p><strong>File:</strong></p>
-			  <ul>
-			    <li><a href="py/avogadro_constant_projection.py"><code>avogadro_constant_projection.py</code></a></li>
-			  </ul>
-
-			  <h4>2.4.3.4 Atomic Mass Unit Projection</h4>
-			  <p>
-			    This method calculates the atomic mass unit (1u) from projected masses of protons, neutrons, and electrons. The mass of a carbon-12 atom is computed as:
-			  </p>
-			  <p style="text-align: center;">
-			    \( m_{\text{C-12}} = 6 (m_p + m_n + m_e) \)
-			  </p>
-			  <p>
-			    where \( m_p = 1.66956 \times 10^{-27} \,\text{kg} \), \( m_n = 1.67492691 \times 10^{-27} \,\text{kg} \), and \( m_e = 9.116693 \times 10^{-31} \,\text{kg} \). The atomic mass unit is then \( m_u = m_{\text{C-12}} / 12 \), compared to the official value \( m_u^{\text{official}} = 1.66053906660 \times 10^{-27} \,\text{kg} \).
-			  </p>
-			  <p><strong>Features:</strong></p>
-			  <ul>
-			    <li>Computation of carbon-12 mass from projected particle masses</li>
-			    <li>Derivation of atomic mass unit via division by 12</li>
-			    <li>Relative deviation analysis against the official value</li>
-			  </ul>
-			  <p><strong>Output:</strong></p>
-			  <ul>
-			    <li>Printed projected and official \( m_u \) in kg</li>
-			    <li>Printed relative deviation in percentage</li>
-			  </ul>
-			  <p><strong>File:</strong></p>
-			  <ul>
-			    <li><a href="py/atomic_mass_unit_projection.py"><code>atomic_mass_unit_projection.py</code></a></li>
-			  </ul>
+				<h3>2.4.1 Entropic Lensing via Monte Carlo Sampling</h3>
+				<p>
+					This method simulates the entropic lensing effect by performing Monte Carlo sampling of a 2D entropy gradient field. It generates \( N = 1,000,000 \) random points in the domain \( [-1, 1]^2 \), defines an entropy field \( S(\mathbf{r}) = e^{-r^2} \) centered at the origin, and computes the numerical gradient to approximate light ray directions. The gradient vectors are normalized to determine the direction of lensing rays, and the deviation angles are calculated to analyze the lensing effect.
+				</p>
+				<p>
+					The entropy field and its gradient are given by:
+				</p>
+				<p style="text-align: center;">
+					\( S(\mathbf{r}) = e^{-r^2}, \quad \nabla S = \left( \frac{\partial S}{\partial x}, \frac{\partial S}{\partial y} \right) = \left( -2x e^{-r^2}, -2y e^{-r^2} \right) \)
+				</p>
+				<p>
+					The deviation angle \( \theta \) is computed as \( \theta = \arctan2\left( \frac{\partial S / \partial y}{\|\nabla S\|}, \frac{\partial S / \partial x}{\|\nabla S\|} \right) \), converted to degrees for statistical analysis.
+				</p>
+				<p><strong>Features:</strong></p>
+				<ul>
+					<li>Monte Carlo sampling with 1,000,000 points for high statistical accuracy</li>
+					<li>Numerical gradient computation for entropy-driven lensing</li>
+					<li>Visualization of normalized gradient vectors as lensing rays</li>
+				</ul>
+				<p><strong>Interactive Features:</strong></p>
+				<ul>
+					<li>Allows user input for the number of Monte Carlo samples (\( N \)) and the plot range for the x,y axes, enabling customizable lensing simulations.</li>
+				</ul>
+				<p><strong>Output:</strong></p>
+				<ul>
+					<li>Printed mean and standard deviation of deviation angles in degrees</li>
+					<li>Quiver plot of lensing rays saved as: <code>img/c7_1_entropic_lensing_rays.png</code></li>
+				</ul>
+				<p><strong>File:</strong></p>
+				<ul>
+					<li><a href="py/montecarlo_structural_simulation.py"><code>montecarlo_structural_simulation.py</code></a></li>
+				</ul>
+				<h3>2.4.2 Cosmological Constant Estimation from Flow Data</h3>
+				<p>
+					This method estimates the cosmological constant \( \Lambda \) using entropic flow data and a projected Hubble constant. Two approaches are implemented: (1) deriving \( \Lambda \) from a projected Hubble constant \( H_0^{\text{proj}} \), and (2) projecting \( H_0 \) from an entropic flow rate and scaling factor, followed by a comparison with the official cosmological constant \( \Lambda_{\text{official}} \).
+				</p>
+				<h4>2.4.2.1 Cosmological Constant from Projected Hubble Constant</h4>
+				<p>
+					The first approach calculates \( \Lambda \) using the relation:
+				</p>
+				<p style="text-align: center;">
+					\( \Lambda = \frac{3 {H_0^{\text{proj}}}^2}{c^2} \)
+				</p>
+				<p>
+					where \( H_0^{\text{proj}} = 2.26908425 \times 10^{-18} \,\text{s}^{-1} \) is the projected Hubble constant, and \( c \) is the speed of light. The result is compared to the official value \( \Lambda_{\text{official}} = 1.1056 \times 10^{-52} \,\text{m}^{-2} \).
+				</p>
+				<p><strong>Features:</strong></p>
+				<ul>
+					<li>Direct computation of \( \Lambda \) from a projected Hubble constant</li>
+					<li>Comparison with the official cosmological constant</li>
+					<li>Relative deviation calculation for validation</li>
+				</ul>
+				<p><strong>Interactive Features:</strong></p>
+				<ul>
+					<li>Allows user input for the projected Hubble constant (<code>H0_proj</code>) and speed of light (<code>c</code>) to explore different cosmological scenarios. Default values: <code>H0_proj = 2.26908425e-18 1/s</code>, <code>c = 2.99792458e8 m/s</code>.</li>
+				</ul>
+				<p><strong>Output:</strong></p>
+				<ul>
+					<li>Printed \( \Lambda_{\text{proj}} \) and \( \Lambda_{\text{official}} \) in \( \text{m}^{-2} \)</li>
+					<li>Printed relative deviation in percentage</li>
+				</ul>
+				<p><strong>File:</strong></p>
+				<ul>
+					<li><a href="py/cosmo_constant_from_hubble_flow.py"><code>cosmo_constant_from_hubble_flow.py</code></a></li>
+				</ul>
+				<h4>2.4.2.2 Hubble Constant from Entropic Projection</h4>
+				<p>
+					The second approach projects the Hubble constant \( H_0^{\text{proj}} \) from an entropic flow rate and a scaling factor. The entropic flow rate is defined as \( \dot{S} = \frac{k_B}{\tau} \), where \( k_B = 1.380648 \times 10^{-23} \,\text{J/K} \) is the Boltzmann constant and \( \tau = 4.35 \times 10^{17} \,\text{s} \) is the entropic timescale (set to the universe's age). The entropic volume scale is \( V = c^3 t_{\text{universe}}^2 \), and the projected Hubble constant is computed as:
+				</p>
+				<p style="text-align: center;">
+					\( H_0^{\text{proj}} = \frac{\dot{S}}{V} \cdot \beta_H \)
+				</p>
+				<p>
+					where \( \beta_H = 3.645 \times 10^{83} \) is a dimensionless scaling factor. The result is compared to the official Hubble constant \( H_0^{\text{official}} = 2.26854594 \times 10^{-18} \,\text{s}^{-1} \).
+				</p>
+				<p><strong>Features:</strong></p>
+				<ul>
+					<li>Entropic projection of the Hubble constant using physical constants</li>
+					<li>Incorporation of a tuned scaling factor \( \beta_H \)</li>
+					<li>Relative deviation analysis against the official Hubble constant</li>
+				</ul>
+				<p><strong>Interactive Features:</strong></p>
+				<ul>
+					<li>Allows user input for the entropic scaling factor (<code>beta_H</code>), entropic timescale (<code>tau</code>), and universe age (<code>t_universe</code>) to test different cosmological models. Default values: <code>beta_H = 3.645e83</code>, <code>tau = 4.35e17 s</code>, <code>t_universe = 4.35e17 s</code>.</li>
+				</ul>
+				<p><strong>Output:</strong></p>
+				<ul>
+					<li>Printed \( \tau \), \( \dot{S} \), \( V \), \( H_0^{\text{proj}} \), and \( H_0^{\text{official}} \)</li>
+					<li>Printed relative deviation in percentage</li>
+				</ul>
+				<p><strong>File:</strong></p>
+				<ul>
+					<li><a href="py/hubble_constant_from_entropy.py"><code>hubble_constant_from_entropy.py</code></a></li>
+				</ul>
+				<h3>2.4.3 Projection of Physical Constants</h3>
+				<p>
+					This section presents methods to project fundamental physical constants using derived or assumed values, comparing them with their official values to assess accuracy. The methods include calculations of the Thomson scattering cross section, Compton wavelength, Avogadro's number, and the atomic mass unit, each using projected physical constants such as the fine-structure constant, electron mass, and speed of light.
+				</p>
+				<h4>2.4.3.1 Thomson Cross Section Projection</h4>
+				<p>
+					This method calculates the Thomson scattering cross section \( \sigma_T \) using projected constants:
+				</p>
+				<p style="text-align: center;">
+					\( \sigma_T = \frac{8\pi}{3} \left( \frac{\alpha \hbar}{m_e c} \right)^2 \)
+				</p>
+				<p>
+					where \( \alpha = 7.2973525693 \times 10^{-3} \) (fine-structure constant), \( \hbar = 1.054571817 \times 10^{-34} \,\text{J·s} \) (reduced Planck constant), \( m_e = 9.1093837015 \times 10^{-31} \,\text{kg} \) (electron mass), and \( c = 2.99792458 \times 10^8 \,\text{m·s}^{-1} \) (speed of light). The result is compared to the official value \( \sigma_T^{\text{official}} = 6.6524587158 \times 10^{-29} \,\text{m}^2 \).
+				</p>
+				<p><strong>Features:</strong></p>
+				<ul>
+					<li>Uses projected fundamental constants for Thomson scattering</li>
+					<li>Direct analytical computation of \( \sigma_T \)</li>
+					<li>Relative deviation analysis against the official value</li>
+				</ul>
+				<p><strong>Interactive Features:</strong></p>
+				<ul>
+					<li>Allows user input for fine-structure constant (<code>alpha_proj</code>), reduced Planck constant (<code>hbar_proj</code>), electron mass (<code>m_e_proj</code>), and speed of light (<code>c</code>) to compute the Thomson scattering cross section. Default values: <code>alpha_proj = 7.2973525693e-3</code>, <code>hbar_proj = 1.054571817e-34 J·s</code>, <code>m_e_proj = 9.1093837015e-31 kg</code>, <code>c = 2.99792458e8 m/s</code>.</li>
+				</ul>
+				<p><strong>Output:</strong></p>
+				<ul>
+					<li>Printed projected and official \( \sigma_T \) in \( \text{m}^2 \)</li>
+					<li>Printed relative deviation in percentage</li>
+				</ul>
+				<p><strong>File:</strong></p>
+				<ul>
+					<li><a href="py/thomson_cross_section_projection.py"><code>thomson_cross_section_projection.py</code></a></li>
+				</ul>
+				<h4>2.4.3.2 Compton Wavelength Projection</h4>
+				<p>
+					This method calculates the Compton wavelength \( \lambda_C \) of the electron using the full Planck constant \( h = 2\pi \hbar \), with:
+				</p>
+				<p style="text-align: center;">
+					\( \lambda_C = \frac{h}{m_e c} \)
+				</p>
+				<p>
+					where \( \hbar = 1.054571817 \times 10^{-34} \,\text{J·s} \), \( m_e = 9.1093837015 \times 10^{-31} \,\text{kg} \), and \( c = 2.99792458 \times 10^8 \,\text{m·s}^{-1} \). The result is compared to the official value \( \lambda_C^{\text{official}} = 2.42631023867 \times 10^{-12} \,\text{m} \).
+				</p>
+				<p><strong>Features:</strong></p>
+				<ul>
+					<li>Derivation of full Planck constant from projected \( \hbar \)</li>
+					<li>Analytical computation of Compton wavelength</li>
+					<li>Relative deviation analysis against the official value</li>
+				</ul>
+				<p><strong>Interactive Features:</strong></p>
+				<ul>
+					<li>Allows user input for reduced Planck constant (<code>hbar</code>), electron mass (<code>m_e</code>), and speed of light (<code>c</code>) to compute the Compton wavelength for alternative models. Default values: <code>hbar = 1.054571817e-34 J·s</code>, <code>m_e = 9.1093837015e-31 kg</code>, <code>c = 2.99792458e8 m/s</code>.</li>
+				</ul>
+				<p><strong>Output:</strong></p>
+				<ul>
+					<li>Printed projected and official \( \lambda_C \) in meters</li>
+					<li>Printed relative deviation in percentage</li>
+				</ul>
+				<p><strong>File:</strong></p>
+				<ul>
+					<li><a href="py/compton_wavelength_projection.py"><code>compton_wavelength_projection.py</code></a></li>
+				</ul>
+				<h4>2.4.3.3 Avogadro Constant Projection</h4>
+				<p>
+					This method estimates Avogadro's number \( N_A \) from a projected atomic mass unit:
+				</p>
+				<p style="text-align: center;">
+					\( N_A = \frac{1 \,\text{g}}{m_u} \)
+				</p>
+				<p>
+					where \( m_u = 1.66053906660 \times 10^{-27} \,\text{kg} \) is the projected atomic mass unit, and 1 gram is \( 10^{-3} \,\text{kg} \). The result is compared to the official value \( N_A^{\text{official}} = 6.02214076 \times 10^{23} \).
+				</p>
+				<p><strong>Features:</strong></p>
+				<ul>
+					<li>Simple scaling from projected atomic mass unit</li>
+					<li>Direct computation of Avogadro's number</li>
+					<li>Relative deviation analysis against the official value</li>
+				</ul>
+				<p><strong>Interactive Features:</strong></p>
+				<ul>
+					<li>Allows user input for the atomic mass unit (<code>m_u</code>) to compute Avogadro's number. Default value: <code>m_u = 1.66053906660e-27 kg</code>.</li>
+				</ul>
+				<p><strong>Output:</strong></p>
+				<ul
 			</section>
-
 			<h2>2.5 Field-Theoretic Variation and Dynamics</h2>
 			<section id="field-dynamics-stability">
-			  <h3>2.5.1 Lagrangian Density Simulation</h3>
-			  <p>
-			    This method simulates local Lagrangian density values derived from an entropy field to evaluate energy scales and stability under an entropic potential. It generates \( N = 10,000 \) entropy samples drawn from a normal distribution with mean \( S_{\text{mean}} = 2.74309 k_B \) and standard deviation \( S_{\sigma} = 0.05894 k_B \), where \( k_B = 1.380649 \times 10^{-23} \,\text{J/K} \). The Lagrangian density is computed as:
-			  </p>
-			  <p style="text-align: center;">
-			    \( \mathcal{L}_i = \frac{1}{2} \frac{\hbar}{\tau_{\text{meta}}} + \left| -V_{\text{base}} \cdot \frac{S_i}{S_0} \cdot \kappa \right| \)
-			  </p>
-			  <p>
-			    where \( V_{\text{base}} = \frac{\hbar^2}{m_{\text{meta}} l_{\text{meta}}^2} \), \( m_{\text{meta}} = \frac{\hbar}{l_{\text{meta}} c} \), \( \tau_{\text{meta}} = 5.391 \times 10^{-44} \,\text{s} \), \( l_{\text{meta}} = 1.616 \times 10^{-35} \,\text{m} \), and \( \kappa = 7.792 \times 10^4 \). The simulation runs 10 times to assess stability via residual analysis.
-			  </p>
-			  <p><strong>Features:</strong></p>
-			  <ul>
-			    <li>Monte Carlo sampling of entropy field with 10,000 samples</li>
-			    <li>Computation of Lagrangian density with kinetic and potential terms</li>
-			    <li>Stability analysis over multiple runs using residual metrics</li>
-			  </ul>
-			  <p><strong>Output:</strong></p>
-			  <ul>
-			    <li>Printed aggregate statistics: mean, sigma, min, and max of \( \mathcal{L}_i \) in joules</li>
-			    <li>Printed average stability deviation over 10 runs in percentage</li>
-			    <li>Histogram of Lagrangian density saved as: <code>img/c2_1_discrete_lagrangian_simulation_lagrangian_distribution.png</code></li>
-			    <li>Action convergence plot saved as: <code>img/c2_1_discrete_lagrangian_simulation_action_convergence.png</code></li>
-			  </ul>
-			  <p><strong>File:</strong></p>
-			  <ul>
-			    <li><a href="py/lagrangian_density_simulation.py"><code>lagrangian_density_simulation.py</code></a></li>
-			  </ul>
-
-			  <h3>2.5.2 Yang-Mills Field Dynamics</h3>
-			  <p>
-			    This method simulates SU(2)-like Yang-Mills field dynamics using an entropy-derived gauge field \( A^a_\mu \). The field strength tensor \( F^a_{\mu\nu} \) is computed for a gauge coupling \( g = 0.65 \) and field scale \( \kappa = \frac{\hbar}{l_{\text{meta}}} \), where \( \hbar = 1.054571817 \times 10^{-34} \,\text{J·s} \) and \( l_{\text{meta}} = 1.616 \times 10^{-35} \,\text{m} \). The entropy field is sampled with \( N = 1,000 \) points from a normal distribution with mean \( S_{\text{mean}} = 2.74309 \) and standard deviation \( S_{\sigma} = 0.05894 \).
-			  </p>
-			  <p>
-			    The field strength is given by:
-			  </p>
-			  <p style="text-align: center;">
-			    \( F^a_{\mu\nu} = \partial_\mu A^a_\nu - \partial_\nu A^a_\mu + g \sum_{b,c} f_{abc} A^b_\mu A^c_\nu \)
-			  </p>
-			  <p>
-			    where \( f_{abc} \) is the structure constant, approximated as \( f_{abc} = \frac{(a - b)(b - c)(c - a)}{2} \). The energy density is computed as \( \rho^a = \sum_{i=1}^3 (F^a_{0i})^2 - \frac{1}{4} \sum_{\mu<\nu} (F^a_{\mu\nu})^2 \).
-			  </p>
-			  <p><strong>Features:</strong></p>
-			  <ul>
-			    <li>Simulation of SU(2)-like gauge field dynamics with entropy-derived fields</li>
-			    <li>Computation of field strength tensor with nonlinear gauge interactions</li>
-			    <li>Energy density analysis across three color indices</li>
-			  </ul>
-			  <p><strong>Output:</strong></p>
-			  <ul>
-			    <li>Printed mean energy density for each color index in \( \text{J/m}^3 \)</li>
-			    <li>Energy density histogram saved as: <code>img/c2_4_yangmills_energy_density_histogram.png</code></li>
-			  </ul>
-			  <p><strong>File:</strong></p>
-			  <ul>
-			    <li><a href="py/yang_mills_field_dynamics.py"><code>yang_mills_field_dynamics.py</code></a></li>
-			  </ul>
+				<h3>2.5.1 Lagrangian Density Simulation</h3>
+				<p>
+					This method simulates local Lagrangian density values derived from an entropy field to evaluate energy scales and stability under an entropic potential. It generates \( N = 10,000 \) entropy samples drawn from a normal distribution with mean \( S_{\text{mean}} = 2.74309 k_B \) and standard deviation \( S_{\sigma} = 0.05894 k_B \), where \( k_B = 1.380649 \times 10^{-23} \,\text{J/K} \). The Lagrangian density is computed as:
+				</p>
+				<p style="text-align: center;">
+					\( \mathcal{L}_i = \frac{1}{2} \frac{\hbar}{\tau_{\text{meta}}} + \left| -V_{\text{base}} \cdot \frac{S_i}{S_0} \cdot \kappa \right| \)
+				</p>
+				<p>
+					where \( V_{\text{base}} = \frac{\hbar^2}{m_{\text{meta}} l_{\text{meta}}^2} \), \( m_{\text{meta}} = \frac{\hbar}{l_{\text{meta}} c} \), \( \tau_{\text{meta}} = 5.391 \times 10^{-44} \,\text{s} \), \( l_{\text{meta}} = 1.616 \times 10^{-35} \,\text{m} \), and \( \kappa = 7.792 \times 10^4 \). The simulation runs 10 times to assess stability via residual analysis.
+				</p>
+				<p><strong>Features:</strong></p>
+				<ul>
+					<li>Monte Carlo sampling of entropy field with 10,000 samples</li>
+					<li>Computation of Lagrangian density with kinetic and potential terms</li>
+					<li>Stability analysis over multiple runs using residual metrics</li>
+				</ul>
+				<p><strong>Interactive Features:</strong></p>
+				<ul>
+					<li>Allows user input for mean entropy (<code>S_mean</code>), entropy standard deviation (<code>S_sigma</code>), number of samples (<code>N</code>), number of repeats (<code>repeats</code>), and scaling factor (<code>kappa</code>) to customize the Lagrangian density simulation. Default values: <code>S_mean = 2.74309</code>, <code>S_sigma = 0.05894</code>, <code>N = 1000</code>, <code>repeats = 500</code>, <code>kappa = 6.5244e34 J/m</code>.</li>
+				</ul>
+				<p><strong>Output:</strong></p>
+				<ul>
+					<li>Printed aggregate statistics: mean, sigma, min, and max of \( \mathcal{L}_i \) in joules</li>
+					<li>Printed average stability deviation over 10 runs in percentage</li>
+					<li>Histogram of Lagrangian density saved as: <code>img/c2_1_discrete_lagrangian_simulation_lagrangian_distribution.png</code></li>
+					<li>Action convergence plot saved as: <code>img/c2_1_discrete_lagrangian_simulation_action_convergence.png</code></li>
+				</ul>
+				<p><strong>File:</strong></p>
+				<ul>
+					<li><a href="py/lagrangian_density_simulation.py"><code>lagrangian_density_simulation.py</code></a></li>
+				</ul>
+				<h4>2.5.2 Yang-Mills Field Dynamics</h4>
+				<p>
+					This method simulates SU(2)-like Yang-Mills field dynamics using an entropy-derived gauge field \( A^a_\mu \). The field strength tensor \( F^a_{\mu\nu} \) is computed for a gauge coupling \( g = 0.65 \) and field scale \( \kappa = \frac{\hbar}{l_{\text{meta}}} \), where \( \hbar = 1.054571817 \times 10^{-34} \,\text{J·s} \) and \( l_{\text{meta}} = 1.616 \times 10^{-35} \,\text{m} \). The entropy field is sampled with \( N = 1,000 \) points from a normal distribution with mean \( S_{\text{mean}} = 2.74309 \) and standard deviation \( S_{\sigma} = 0.05894 \).
+				</p>
+				<p style="text-align: center;">
+					\( F^a_{\mu\nu} = \partial_\mu A^a_\nu - \partial_\nu A^a_\mu + g \sum_{b,c} f_{abc} A^b_\mu A^c_\nu \)
+				</p>
+				<p>
+					where \( f_{abc} \) is the structure constant, approximated as \( f_{abc} = \frac{(a - b)(b - c)(c - a)}{2} \). The energy density for each color index \( a \) is computed as:
+				</p>
+				<p style="text-align: center;">
+					\( \rho^a = \sum_{i=1}^3 (F^a_{0i})^2 - \frac{1}{4} \sum_{\mu<\nu} (F^a_{\mu\nu})^2 \)
+				</p>
+				<p>
+					This energy density reflects the contributions of the electric and magnetic components of the field, providing insight into the dynamics of the SU(2)-like gauge field.
+				</p>
+				<p><strong>Features:</strong></p>
+				<ul>
+					<li>Simulation of SU(2)-like gauge field dynamics with entropy-derived fields</li>
+					<li>Computation of field strength tensor with nonlinear gauge interactions</li>
+					<li>Energy density analysis across three color indices</li>
+				</ul>
+				<p><strong>Interactive Features:</strong></p>
+				<ul>
+				  <li>Allows user input for mean entropy (<code>S_mean</code>), entropy standard deviation (<code>S_sigma</code>), and number of samples (<code>N</code>) to simulate Yang-Mills field dynamics. Default values: <code>S_mean = 2.74309</code>, <code>S_sigma = 0.05894</code>, <code>N = 1000</code>.</li>
+				</ul>
+				<p><strong>Output:</strong></p>
+				<ul>
+					<li>Printed mean energy density for each color index, e.g., \( 3.44012 \times 10^{-2} \,\text{J/m}^3 \) (color 0), \( 3.65700 \times 10^{-2} \,\text{J/m}^3 \) (color 1), \( 3.60013 \times 10^{-2} \,\text{J/m}^3 \) (color 2)</li>
+					<li>Energy density histogram saved as: <code>img/c2_4_yangmills_energy_density_histogram.png</code></li>
+				</ul>
+				<p><strong>File:</strong></p>
+				<ul>
+					<li><a href="py/yang_mills_field_dynamics.py"><code>yang_mills_field_dynamics.py</code></a></li>
+				</ul>
 			</section>
-
 			<h2>2.6 Gradient and Entropy-Based Analysis</h2>
 			<section id="gradient-entropy-analysis">
-			  <h3>2.6.1 Entropy Vector Field Visualization</h3>
-			  <p>
-			    This method projects the entropy gradient \( \partial_\mu S \) onto an abelian vector field \( A_\mu \) to analyze its statistical properties. Using \( N = 10,000 \) samples, the entropy gradient is computed with a mean entropy \( S_{\text{mean}} = 2.74309 \) and standard deviation \( S_{\sigma} = 0.05894 \). The vector field is scaled by \( \kappa = \frac{\hbar}{l_{\text{meta}}} \), where \( \hbar = 1.054571817 \times 10^{-34} \,\text{J·s} \) and \( l_{\text{meta}} = 1.616 \times 10^{-35} \,\text{m} \), yielding:
-			  </p>
-			  <p style="text-align: center;">
-			    \( A_\mu = \kappa \cdot \partial_\mu S \)
-			  </p>
-			  <p>
-			    The components \( A_0, A_1, A_2, A_3 \) correspond to the temporal and spatial derivatives of the entropy field.
-			  </p>
-			  <p><strong>Features:</strong></p>
-			  <ul>
-			    <li>Monte Carlo sampling of entropy gradient with 10,000 points</li>
-			    <li>Projection onto a 4D abelian vector field</li>
-			    <li>Statistical and visual analysis of field components</li>
-			  </ul>
-			  <p><strong>Output:</strong></p>
-			  <ul>
-			    <li>Printed mean and maximum components of \( A_\mu \)</li>
-			    <li>Histogram of \( A_\mu \) components saved as: <code>img/c2_2_entropy_vectorfield_histogram.png</code></li>
-			    <li>Sorted norm plot of \( |A_\mu| \) saved as: <code>img/c2_2_entropy_vectorfield_norm_sorted.png</code></li>
-			  </ul>
-			  <p><strong>File:</strong></p>
-			  <ul>
-			    <li><a href="py/entropy_vector_field_visualization.py"><code>entropy_vector_field_visualization.py</code></a></li>
-			  </ul>
-
-			  <h3>2.6.2 Hessian Scale Analysis</h3>
-			  <p>
-			    This method simulates the evolution of a 3D entropy field over a meta-time dimension, computing 3D and 4D Hessian matrices to analyze curvature and stability. The entropy field \( S(x, y, z, \tau) \) is initialized on a \( 50 \times 50 \times 50 \) grid with \( N_\tau = 600 \) meta-time steps, using spatial resolution \( dx = dy = dz = 0.1 \) and meta-time resolution \( d\tau = 0.01 \). The field evolves via a diffusion equation with a nonlinear source term:
-			  </p>
-			  <p style="text-align: center;">
-			    \( \frac{\partial S}{\partial \tau} = D \nabla^2 S + 0.5 \tanh\left(20 (|\nabla S| - \text{threshold})\right) \cdot \mathbb{1}_{|\nabla S| > \text{threshold}} \)
-			  </p>
-			  <p>
-			    where \( D = 0.02 \) and \( \text{threshold} = 0.04 \). The 3D Hessian is computed at the global maximum of the final entropy field, and the 4D Hessian includes the meta-time dimension.
-			  </p>
-			  <p><strong>Features:</strong></p>
-			  <ul>
-			    <li>3D entropy field evolution with nonlinear dynamics</li>
-			    <li>Computation of 3D and 4D Hessian matrices at key points</li>
-			    <li>Visualization of entropy slices and mean entropy evolution</li>
-			  </ul>
-			  <p><strong>Output:</strong></p>
-			  <ul>
-			    <li>Printed statistical summary (mean, std, min, max) at selected meta-times</li>
-			    <li>Printed global maximum position and value</li>
-			    <li>Printed 3D and 4D Hessian matrices and their eigenvalues</li>
-			    <li>2D entropy slice visualizations saved as: <code>entropy_slices.png</code></li>
-			    <li>Mean entropy evolution plot saved as: <code>mean_entropy_evolution.png</code></li>
-			  </ul>
-			  <p><strong>File:</strong></p>
-			  <ul>
-			    <li><a href="py/hessian_scale_analysis.py"><code>hessian_scale_analysis.py</code></a></li>
-			  </ul>
-
-			  <h3>2.6.3 Planck Constant Reconstruction</h3>
-			  <p>
-			    This method reconstructs the reduced Planck constant \( \hbar \) using model-based estimates of physical constants: the Bohr radius \( a_0 \), electron mass \( m_e \), speed of light \( c \), and fine-structure constant \( \alpha \). The reconstruction is performed as:
-			  </p>
-			  <p style="text-align: center;">
-			    \( \hbar \approx \alpha \cdot a_0 \cdot m_e \cdot c \)
-			  </p>
-			  <p>
-			    with projected values \( a_0 = 5.287529430330 \times 10^{-11} \,\text{m} \), \( m_e = 9.116693 \times 10^{-31} \,\text{kg} \), \( c = 2.99758857 \times 10^8 \,\text{m/s} \), and \( \alpha = 1/137.035999084 \). The result is compared to the official value \( \hbar_{\text{official}} = 1.054571817 \times 10^{-34} \,\text{J·s} \).
-			  </p>
-			  <p><strong>Features:</strong></p>
-			  <ul>
-			    <li>Reconstruction of \( \hbar \) from model-derived constants</li>
-			    <li>Direct analytical computation</li>
-			    <li>Relative deviation analysis against the official value</li>
-			  </ul>
-			  <p><strong>Output:</strong></p>
-			  <ul>
-			    <li>Printed projected constants (\( a_0, m_e, c, \alpha \)) and reconstructed \( \hbar \)</li>
-			    <li>Printed official \( \hbar \) and relative deviation in percentage</li>
-			  </ul>
-			  <p><strong>File:</strong></p>
-			  <ul>
-			    <li><a href="py/planck_constant_reconstruction.py"><code>planck_constant_reconstruction.py</code></a></li>
-			  </ul>
-
-			  <h3>2.6.4 Gravitational Constant Projection</h3>
-			  <p>
-			    This method estimates the gravitational constant \( G \) using model-derived values for the reduced Planck constant \( \hbar \), speed of light \( c \), and an effective correlation length \( L_{\text{eff}} \) set to the Planck length. The gravitational constant is computed using the scaling relation:
-			  </p>
-			  <p style="text-align: center;">
-			    \( G \approx \frac{L_{\text{eff}}^2 c^3}{\hbar} \)
-			  </p>
-			  <p>
-			    The input values are \( \hbar = 1.054453619060 \times 10^{-34} \,\text{J·s} \), \( c = 2.997589 \times 10^8 \,\text{m/s} \), and \( L_{\text{eff}} = 1.616255 \times 10^{-35} \,\text{m} \). The result is compared to the official CODATA value \( G_{\text{official}} = 6.67430 \times 10^{-11} \,\text{m}^3 \cdot \text{kg}^{-1} \cdot \text{s}^{-2} \).
-			  </p>
-			  <p><strong>Features:</strong></p>
-			  <ul>
-			    <li>Analytical estimation of \( G \) using model-derived constants</li>
-			    <li>Scaling relation based on Planck-scale parameters</li>
-			    <li>Relative deviation analysis against the official CODATA value</li>
-			  </ul>
-			  <p><strong>Output:</strong></p>
-			  <ul>
-			    <li>Printed \( L_{\text{eff}} \), projected \( G \), and official \( G \) in \( \text{m}^3 \cdot \text{kg}^{-1} \cdot \text{s}^{-2} \)</li>
-			    <li>Printed relative deviation in percentage</li>
-			  </ul>
-			  <p><strong>File:</strong></p>
-			  <ul>
-			    <li><a href="py/mass_and_g_projection.py"><code>mass_and_g_projection.py</code></a></li>
-			  </ul>
+				<h3>2.6.1 Entropy Vector Field Visualization</h3>
+				<p>
+					This method projects the entropy gradient \( \partial_\mu S \) onto an abelian vector field \( A_\mu \) to analyze its statistical properties. Using \( N = 10,000 \) samples, the entropy gradient is computed with a mean entropy \( S_{\text{mean}} = 2.74309 \) and standard deviation \( S_{\sigma} = 0.05894 \). The vector field is scaled by \( \kappa = \frac{\hbar}{l_{\text{meta}}} \), where \( \hbar = 1.054571817 \times 10^{-34} \,\text{J·s} \) and \( l_{\text{meta}} = 1.616 \times 10^{-35} \,\text{m} \), yielding:
+				</p>
+				<p style="text-align: center;">
+					\( A_\mu = \kappa \cdot \partial_\mu S \)
+				</p>
+				<p>
+					The components \( A_0, A_1, A_2, A_3 \) correspond to the temporal and spatial derivatives of the entropy field.
+				</p>
+				<p><strong>Features:</strong></p>
+				<ul>
+					<li>Monte Carlo sampling of entropy gradient with 10,000 points</li>
+					<li>Projection onto a 4D abelian vector field</li>
+					<li>Statistical and visual analysis of field components</li>
+				</ul>
+				<p><strong>Interactive Features:</strong></p>
+				<ul>
+					<li>Allows user input for mean entropy (<code>S_mean</code>), entropy standard deviation (<code>S_sigma</code>), and number of samples (<code>N</code>) to customize the entropy distribution and visualization. Default values: <code>S_mean = 2.74309</code>, <code>S_sigma = 0.05894</code>, <code>N = 10000</code>.</li>
+				</ul>
+				<p><strong>Output:</strong></p>
+				<ul>
+					<li>Printed mean and maximum components of \( A_\mu \)</li>
+					<li>Histogram of \( A_\mu \) components saved as: <code>img/c2_2_entropy_vectorfield_histogram.png</code></li>
+					<li>Sorted norm plot of \( |A_\mu| \) saved as: <code>img/c2_2_entropy_vectorfield_norm_sorted.png</code></li>
+				</ul>
+				<p><strong>File:</strong></p>
+				<ul>
+					<li><a href="py/entropy_vector_field_visualization.py"><code>entropy_vector_field_visualization.py</code></a></li>
+				</ul>
+				<h3>2.6.2 Hessian Scale Analysis</h3>
+				<p>
+					This method simulates the evolution of a 3D entropy field over a meta-time dimension, computing 3D and 4D Hessian matrices to analyze curvature and stability. The entropy field \( S(x, y, z, \tau) \) is initialized on a \( 50 \times 50 \times 50 \) grid with \( N_\tau = 600 \) meta-time steps, using spatial resolution \( dx = dy = dz = 0.1 \) and meta-time resolution \( d\tau = 0.01 \). The field evolves via a diffusion equation with a nonlinear source term:
+				</p>
+				<p style="text-align: center;">
+					\( \frac{\partial S}{\partial \tau} = D \nabla^2 S + 0.5 \tanh\left(20 (|\nabla S| - \text{threshold})\right) \cdot \mathbb{1}_{|\nabla S| > \text{threshold}} \)
+				</p>
+				<p>
+					where \( D = 0.02 \) and \( \text{threshold} = 0.04 \). The 3D Hessian is computed at the global maximum of the final entropy field, and the 4D Hessian includes the meta-time dimension.
+				</p>
+				<p><strong>Features:</strong></p>
+				<ul>
+					<li>3D entropy field evolution with nonlinear dynamics</li>
+					<li>Computation of 3D and 4D Hessian matrices at key points</li>
+					<li>Visualization of entropy slices and mean entropy evolution</li>
+				</ul>
+				<p><strong>Interactive Features:</strong></p>
+				<ul>
+					<li>Allows user input for grid sizes (<code>Nx, Ny, Nz</code>), meta-time steps (<code>Ntau</code>), spatial and temporal resolutions (<code>dx, dtau</code>), diffusion coefficient (<code>D</code>), and source threshold (<code>threshold</code>) to customize the entropy field simulation. Default values: <code>Nx = Ny = Nz = 50</code>, <code>Ntau = 600</code>, <code>dx = dtau = 0.1</code>, <code>D = 0.02</code>, <code>threshold = 0.04</code>.</li>
+				</ul>
+				<p><strong>Output:</strong></p>
+				<ul>
+					<li>Printed statistical summary (mean, std, min, max) at selected meta-times</li>
+					<li>Printed global maximum position and value</li>
+					<li>Printed 3D and 4D Hessian matrices and their eigenvalues</li>
+					<li>2D entropy slice visualizations saved as: <code>entropy_slices.png</code></li>
+					<li>Mean entropy evolution plot saved as: <code>mean_entropy_evolution.png</code></li>
+				</ul>
+				<p><strong>File:</strong></p>
+				<ul>
+					<li><a href="py/hessian_scale_analysis.py"><code>hessian_scale_analysis.py</code></a></li>
+				</ul>
+				<h3>2.6.3 Planck Constant Reconstruction</h3>
+				<p>
+					This method reconstructs the reduced Planck constant \( \hbar \) using model-based estimates of physical constants: the Bohr radius \( a_0 \), electron mass \( m_e \), speed of light \( c \), and fine-structure constant \( \alpha \). The reconstruction is performed as:
+				</p>
+				<p style="text-align: center;">
+					\( \hbar \approx \alpha \cdot a_0 \cdot m_e \cdot c \)
+				</p>
+				<p>
+					with projected values \( a_0 = 5.287529430330 \times 10^{-11} \,\text{m} \), \( m_e = 9.116693 \times 10^{-31} \,\text{kg} \), \( c = 2.99758857 \times 10^8 \,\text{m/s} \), and \( \alpha = 1/137.035999084 \). The result is compared to the official value \( \hbar_{\text{official}} = 1.054571817 \times 10^{-34} \,\text{J·s} \).
+				</p>
+				<p><strong>Features:</strong></p>
+				<ul>
+					<li>Reconstruction of \( \hbar \) from model-derived constants</li>
+					<li>Direct analytical computation</li>
+					<li>Relative deviation analysis against the official value</li>
+				</ul>
+				<p><strong>Interactive Features:</strong></p>
+				<ul>
+					<li>Allows user input for projected Bohr radius (<code>a0_proj</code>), electron mass (<code>m_e_proj</code>), speed of light (<code>c_proj</code>), and fine-structure constant (<code>alpha_proj</code>) to reconstruct the Planck constant. Default values: <code>a0_proj = 5.29177210903e-11 m</code>, <code>m_e_proj = 9.1093837015e-31 kg</code>, <code>c_proj = 2.99792458e8 m/s</code>, <code>alpha_proj = 7.2973525693e-3</code>.</li>
+				</ul>
+				<p><strong>Output:</strong></p>
+				<ul>
+					<li>Printed projected constants (\( a_0, m_e, c, \alpha \)) and reconstructed \( \hbar \)</li>
+					<li>Printed official \( \hbar \) and relative deviation in percentage</li>
+				</ul>
+				<p><strong>File:</strong></p>
+				<ul>
+					<li><a href="py/planck_constant_reconstruction.py"><code>planck_constant_reconstruction.py</code></a></li>
+				</ul>
+				<h3>2.6.4 Gravitational Constant Projection</h3>
+				<p>
+					This method estimates the gravitational constant \( G \) using model-derived values for the reduced Planck constant \( \hbar \), speed of light \( c \), and an effective correlation length \( L_{\text{eff}} \) set to the Planck length. The gravitational constant is computed using the scaling relation:
+				</p>
+				<p style="text-align: center;">
+					\( G \approx \frac{L_{\text{eff}}^2 c^3}{\hbar} \)
+				</p>
+				<p>
+					The input values are \( \hbar = 1.054453619060 \times 10^{-34} \,\text{J·s} \), \( c = 2.997589 \times 10^8 \,\text{m/s} \), and \( L_{\text{eff}} = 1.616255 \times 10^{-35} \,\text{m} \). The result is compared to the official CODATA value \( G_{\text{official}} = 6.67430 \times 10^{-11} \,\text{m}^3 \cdot \text{kg}^{-1} \cdot \text{s}^{-2} \).
+				</p>
+				<p><strong>Features:</strong></p>
+				<ul>
+					<li>Analytical estimation of \( G \) using model-derived constants</li>
+					<li>Scaling relation based on Planck-scale parameters</li>
+					<li>Relative deviation analysis against the official CODATA value</li>
+				</ul>
+				<p><strong>Interactive Features:</strong></p>
+				<ul>
+				  <li>Allows user input for reduced Planck constant (<code>hbar</code>), speed of light (<code>c</code>), and effective length scale (<code>L_eff</code>) to estimate the gravitational constant. Default values: <code>hbar = 1.054571817e-34 J·s</code>, <code>c = 2.99792458e8 m/s</code>, <code>L_eff = 1.616255e-35 m</code>.</li>
+				</ul>
+				<p><strong>Output:</strong></p>
+				<ul>
+					<li>Printed <code>L_eff</code>, projected <code>G</code>, and official <code>G</code> in <code>m^3·kg^-1·s^-2</code></li>
+					<li>Printed relative deviation in percentage</li>
+				</ul>
+				<p><strong>File:</strong></p>
+				<ul>
+					<li><a href="py/mass_and_g_projection.py"><code>mass_and_g_projection.py</code></a></li>
+				</ul>
 			</section>
+			<h2>3. Applications</h2>
 			<section id="applications">
-			  <h2>3. Applications</h2>
-			  <p>
-			    The computational methods presented in this work have broad applications across theoretical physics, cosmology, and particle physics. The tools developed, such as renormalization group solvers, Lie algebra decompositions, and entropy-based field analyses, can be applied to problems ranging from grand unified theories to cosmological parameter estimation. For instance, the RG flow solvers and stability analyses are useful for validating supersymmetric models, while the entropic lensing and curvature projection methods offer insights into emergent spacetime structures. These tools are designed to be modular, allowing researchers to adapt them to specific physical systems without requiring a predefined theoretical framework.
-			  </p>
-			  <p>
-			    Specific applications include:
-			  </p>
-			  <ul>
-			    <li>Testing gauge coupling unification in beyond-Standard-Model scenarios</li>
-			    <li>Simulating gravitational effects in entropic models of spacetime</li>
-			    <li>Estimating fundamental constants for consistency checks in theoretical models</li>
-			    <li>Analyzing topological stability in quantum field theories</li>
-			  </ul>
-			  <p>
-			    Future work may extend these tools to experimental data analysis, such as constraining cosmological parameters using observational datasets or validating symmetry-breaking patterns in high-energy physics experiments.
-			  </p>
+				<p>
+					The computational methods presented in this work have broad applications across theoretical physics, cosmology, and particle physics. Below, we highlight two specific case studies demonstrating the practical utility of these tools, with references to the relevant sections for further details.
+				</p>
+				<div class="case-study">
+					<h4>Case Study 1: Testing Gauge Coupling Unification in Grand Unified Theories</h4>
+					<p>
+						The renormalization group (RG) flow solvers (see Section 2.1.1 and 2.1.2) are instrumental in testing gauge coupling unification in beyond-Standard-Model scenarios, such as SO(10) or SU(5) grand unified theories (GUTs). By computing the 1-loop RG evolution of the gauge couplings \( \alpha_i \) for U(1), SU(2), and SU(3), the method identifies the unification scale \( \mu_{\text{unif}} \approx 2.035 \times 10^{16} \,\text{GeV} \) and the unified coupling \( \alpha_{\text{unif}} \approx 0.04115 \). This analysis constrains GUT model parameters and validates supersymmetric extensions like the MSSM, providing numerical benchmarks for high-energy physics experiments.
+					</p>
+				</div>
+				<div class="case-study">
+					<h4>Case Study 2: Modeling Gravitational Lensing via Entropic Projections</h4>
+					<p>
+						The Monte Carlo entropic lensing method (see Section 2.4.1) simulates gravitational lensing effects by projecting entropy gradients onto a 2D field, offering insights into emergent spacetime structures. Applied to galaxy cluster lensing, this method generates ray deflection angles (mean: \( 0.1783^\circ \), standard deviation: \( 103.4540^\circ \)) that can be compared with observational data to constrain dark matter distributions or test entropic gravity models. The quiver plot of lensing rays visualizes the deflection patterns, aiding in the interpretation of cosmological datasets.
+					</p>
+				</div>
+				<p>
+					Additional applications include estimating fundamental constants (see Section 2.4.3) for consistency checks in theoretical models and analyzing topological stability in quantum field theories (see Section 2.3.1). These tools are designed to be modular, allowing researchers to adapt them to specific physical systems without requiring a predefined theoretical framework. Future work may extend these methods to experimental data analysis, such as constraining cosmological parameters or validating symmetry-breaking patterns in high-energy physics experiments.
+				</p>
 			</section>
-
+			<h2>4. Conclusion</h2>
 			<section id="conclusion">
-			  <h2>4. Conclusion</h2>
-			  <p>
-			    This work provides a comprehensive suite of computational tools for analyzing physical structures through renormalization, symmetry, topology, and entropy-based methods. By abstracting these methods from specific theoretical contexts, we ensure their versatility for a wide range of applications in theoretical physics. The numerical implementations, including RG flow solvers, Lie group branching, and entropic field simulations, demonstrate robust performance in modeling complex physical systems. The projection of fundamental constants, such as the gravitational constant and Planck constant, highlights the potential for these methods to bridge theoretical predictions with empirical values.
-			  </p>
-			  <p>
-			    The modular design of these tools encourages further development and adaptation, paving the way for future research into unified theories, emergent spacetime, and cosmological dynamics. The open-source availability of the associated code ensures accessibility for researchers aiming to explore these phenomena in diverse contexts.
-			  </p>
+				<p>
+					This work provides a comprehensive suite of computational tools for analyzing physical structures through renormalization, symmetry, topology, and entropy-based methods. By abstracting these methods from specific theoretical contexts, we ensure their versatility for a wide range of applications in theoretical physics. The numerical implementations, including RG flow solvers, Lie group branching, and entropic field simulations, demonstrate robust performance in modeling complex physical systems. The projection of fundamental constants, such as the gravitational constant and Planck constant, highlights the potential for these methods to bridge theoretical predictions with empirical values.
+				</p>
+				<p>
+					The modular design of these tools encourages further development and adaptation, paving the way for future research into unified theories, emergent spacetime, and cosmological dynamics. The open-source availability of the associated code ensures accessibility for researchers aiming to explore these phenomena in diverse contexts.
+				</p>
 			</section>
-
+			<h2>Appendix</h2>
 			<section id="appendix">
-			  <h2>Appendix</h2>
-			  <p>
-			    This appendix provides an overview of the computational methods described in this work, including their purposes, associated Python modules, and validity status. The table below summarizes each method, its description, the corresponding source file(s), and whether it remains valid for use.
-			  </p>
-			  <table>
-			    <tr>
-			      <th >Method</th>
-			      <th >Description</th>
-			      <th >Module / Reference</th>
-			      <th >Remains Valid?</th>
-			    </tr>
-			    <tr>
-			      <td>RG Flow as ODE Solver</td>
-			      <td>Solves 1-loop RG equations as ordinary differential equations in meta-time</td>
-			      <td><code>rgflow_ode_solver.py</code></td>
-			      <td>✓</td>
-			    </tr>
-			    <tr>
-			      <td>Top Yukawa Flow</td>
-			      <td>Tracks the evolution of the top Yukawa coupling via ODE integration</td>
-			      <td><code>top_yukawa_flow.py</code></td>
-			      <td>✓</td>
-			    </tr>
-			    <tr>
-			      <td>Yukawa Matrix Eigenvalue Evolution</td>
-			      <td>Tracks the evolution of Yukawa matrix eigenvalues under RG flow</td>
-			      <td><code>yukawa_eigenvalue_evolution.py</code></td>
-			      <td>✓</td>
-			    </tr>
-			    <tr>
-			      <td>RG Stability Parameter Mapping</td>
-			      <td>Analyzes parameter landscapes for RG flow dependence on entropy boundary conditions</td>
-			      <td><code>rg_stability_landscape_mapping.py</code></td>
-			      <td>✓</td>
-			    </tr>
-			    <tr>
-			      <td>Automated Group Branching</td>
-			      <td>Algorithmic decomposition of Lie algebras (e.g., \( E_8 \to \text{SU}(3) \times \text{SU}(2) \times \text{U}(1) \))</td>
-			      <td><code>lie_group_branching_e8_su321.py</code></td>
-			      <td>✓</td>
-			    </tr>
-			    <tr>
-			      <td>Topological Protection Checks</td>
-			      <td>Tests winding numbers, Chern-Simons invariants, and monopoles via discretized field integrals</td>
-			      <td><code>topological_invariant_testing.py</code></td>
-			      <td>✓</td>
-			    </tr>
-			    <tr>
-			      <td>Monte Carlo Entropic Lensing</td>
-			      <td>Statistical simulation of gravitational lensing effects via entropy projections</td>
-			      <td><code>montecarlo_structural_simulation.py</code></td>
-			      <td>✓</td>
-			    </tr>
-			    <tr>
-			      <td>Cosmological Constant Projection</td>
-			      <td>Projects Hubble constant and \( \Lambda \) from entropy flow (FEA discretization)</td>
-			      <td><code>cosmo_constant_from_hubble_flow.py</code><br><code>hubble_constant_from_entropy.py</code></td>
-			      <td>✓</td>
-			    </tr>
-			    <tr>
-			      <td>Particle Constants Projections</td>
-			      <td>Projects Thomson cross section, Compton wavelength, Avogadro number, and atomic mass unit from spectral projections</td>
-			      <td><code>thomson_cross_section_projection.py</code><br><code>compton_wavelength_projection.py</code><br><code>avogadro_constant_projection.py</code><br><code>atomic_mass_unit_projection.py</code></td>
-			      <td>✓</td>
-			    </tr>
-			    <tr>
-			      <td>Lagrangian Density Simulation</td>
-			      <td>Discrete variational calculation of meta-Lagrangian density</td>
-			      <td><code>lagrangian_density_simulation.py</code></td>
-			      <td>✓</td>
-			    </tr>
-			    <tr>
-			      <td>Entropy Vector Field Visualization</td>
-			      <td>Visualization and analysis of entropy gradients as vector fields</td>
-			      <td><code>entropy_vector_field_visualization.py</code></td>
-			      <td>✓</td>
-			    </tr>
-			    <tr>
-			      <td>SUSY Projection</td>
-			      <td>Simulation of supersymmetric projections and \( \Delta m \)-couplings</td>
-			      <td><code>susy_parameter_variation.py</code></td>
-			      <td>✓</td>
-			    </tr>
-			    <tr>
-			      <td>Yang-Mills Dynamics Simulation</td>
-			      <td>Entropy-based modeling of gauge field dynamics</td>
-			      <td><code>yang_mills_field_dynamics.py</code></td>
-			      <td>✓</td>
-			    </tr>
-			    <tr>
-			      <td>Lorentz Signature Projection</td>
-			      <td>Derivation of metric signature from entropy Hessian structure</td>
-			      <td><code>lorentz_signature_detection.py</code></td>
-			      <td>✓</td>
-			    </tr>
-			    <tr>
-			      <td>Einstein Equations from Entropy</td>
-			      <td>Discrete projection of information curvature to effective 4D gravitation</td>
-			      <td><code>discrete_curvature_projection.py</code></td>
-			      <td>✓</td>
-			    </tr>
-			    <tr>
-			      <td>Entropy Hessian Analysis</td>
-			      <td>Eigenvalue and determinant analysis of entropy field Hessian for constant estimation</td>
-			      <td><code>hessian_scale_analysis.py</code></td>
-			      <td>✓</td>
-			    </tr>
-			    <tr>
-			      <td>\( \hbar \)-Reconstruction</td>
-			      <td>Reconstruction of Planck’s constant from entropy-based models</td>
-			      <td><code>planck_constant_reconstruction.py</code></td>
-			      <td>✓</td>
-			    </tr>
-			    <tr>
-			      <td>Mass and Coupling Scale Projection</td>
-			      <td>Projection of \( G \) and mass units from entropy scales and Hessian determinants</td>
-			      <td><code>mass_and_g_projection.py</code></td>
-			      <td>✓</td>
-			    </tr>
-			  </table>
-			  <p>
-			    All source code is available in the project repository, with dependencies including NumPy, Matplotlib, and SymPy. Refer to the repository documentation for setup and usage instructions. All methods are marked as valid, indicating their applicability to current research contexts as of the document’s publication.
-			  </p>
+				<p>
+					This appendix provides an overview of the computational methods described in this work, including their purposes, associated Python modules, and validity status. The table below summarizes each method, its description, the corresponding source file(s), and whether it remains valid for use.
+				</p>
+				<table>
+					<tr>
+						<th>Method</th>
+						<th>Module</th>
+						<th>Description</th>
+						<th>Interactive</th>
+						<th>Remains Valid?</th>
+					</tr>
+					<tr>
+						<td>RG Flow as ODE Solver</td>
+						<td><code>rgflow_ode_solver.py</code></td>
+						<td>Solves 1-loop RG equations as ordinary differential equations in meta-time</td>
+						<td>Yes</td>
+						<td>✓</td>
+					</tr>
+					<tr>
+						<td>Top Yukawa Flow</td>
+						<td><code>top_yukawa_flow.py</code></td>
+						<td>Tracks the evolution of the top Yukawa coupling via ODE integration</td>
+						<td>Yes</td>
+						<td>✓</td>
+					</tr>
+					<tr>
+						<td>Yukawa Matrix Eigenvalue Evolution</td>
+						<td><code>yukawa_matrix_eigenflow.py</code></td>
+						<td>Tracks the evolution of Yukawa matrix eigenvalues under RG flow</td>
+						<td>Yes</td>
+						<td>✓</td>
+					</tr>
+					<tr>
+						<td>RG Stability Parameter Mapping</td>
+						<td><code>rg_stability_landscape_mapping.py</code></td>
+						<td>Analyzes parameter landscapes for RG flow dependence on entropy boundary conditions</td>
+						<td>Yes</td>
+						<td>✓</td>
+					</tr>
+					<tr>
+						<td>Automated Group Branching</td>
+						<td><code>lie_group_branching_e8_su321.py</code></td>
+						<td>Algorithmic decomposition of Lie algebras (e.g., \( E_8 \to \text{SU}(3) \times \text{SU}(2) \times \text{U}(1) \))</td>
+						<td>No</td>
+						<td>✓</td>
+					</tr>
+					<tr>
+						<td>Topological Protection Checks</td>
+						<td><code>topological_invariant_testing.py</code></td>
+						<td>Tests winding numbers, Chern-Simons invariants, and monopoles via discretized field integrals</td>
+						<td>Yes</td>
+						<td>✓</td>
+					</tr>
+					<tr>
+						<td>Monte Carlo Entropic Lensing</td>
+						<td><code>montecarlo_structural_simulation.py</code></td>
+						<td>Statistical simulation of gravitational lensing effects via entropy projections</td>
+						<td>Yes</td>
+						<td>✓</td>
+					</tr>
+					<tr>
+						<td>Cosmological Constant Projection</td>
+						<td><code>cosmo_constant_from_hubble_flow.py</code><br><code>hubble_constant_from_entropy.py</code></td>
+						<td>Projects Hubble constant and \( \Lambda \) from entropy flow (FEA discretization)</td>
+						<td>Yes</td>
+						<td>✓</td>
+					</tr>
+					<tr>
+						<td>Particle Constants Projections</td>
+						<td><code>thomson_cross_section_projection.py</code><br><code>compton_wavelength_projection.py</code><br><code>avogadro_constant_projection.py</code><br><code>atomic_mass_unit_projection.py</code></td>
+						<td>Projects Thomson cross section, Compton wavelength, Avogadro number, and atomic mass unit from spectral projections</td>
+						<td>Yes</td>
+						<td>✓</td>
+					</tr>
+					<tr>
+						<td>Lagrangian Density Simulation</td>
+						<td><code>lagrangian_density_simulation.py</code></td>
+						<td>Discrete variational calculation of meta-Lagrangian density</td>
+						<td>Yes</td>
+						<td>✓</td>
+					</tr>
+					<tr>
+						<td>Entropy Vector Field Visualization</td>
+						<td><code>entropy_vector_field_visualization.py</code></td>
+						<td>Visualization and analysis of entropy gradients as vector fields</td>
+						<td>Yes</td>
+						<td>✓</td>
+					</tr>
+					<tr>
+						<td>SUSY Projection</td>
+						<td><code>susy_parameter_variation.py</code></td>
+						<td>Simulation of supersymmetric projections and \( \Delta m \)-couplings</td>
+						<td>Yes</td>
+						<td>✓</td>
+					</tr>
+					<tr>
+						<td>Yang-Mills Dynamics Simulation</td>
+						<td><code>yang_mills_field_dynamics.py</code></td>
+						<td>Entropy-based modeling of gauge field dynamics</td>
+						<td>Yes</td>
+						<td>✓</td>
+					</tr>
+					<tr>
+						<td>Lorentz Signature Projection</td>
+						<td><code>lorentz_signature_detection.py</code></td>
+						<td>Derivation of metric signature from entropy Hessian structure</td>
+						<td>Yes</td>
+						<td>✓</td>
+					</tr>
+					<tr>
+						<td>Einstein Equations from Entropy</td>
+						<td><code>discrete_curvature_projection.py</code></td>
+						<td>Discrete projection of information curvature to effective 4D gravitation</td>
+						<td>No</td>
+						<td>✓</td>
+					</tr>
+					<tr>
+						<td>Entropy Hessian Analysis</td>
+						<td><code>hessian_scale_analysis.py</code></td>
+						<td>Eigenvalue and determinant analysis of entropy field Hessian for constant estimation</td>
+						<td>Yes</td>
+						<td>✓</td>
+					</tr>
+					<tr>
+						<td>\( \hbar \)-Reconstruction</td>
+						<td><code>planck_constant_reconstruction.py</code></td>
+						<td>Reconstruction of Planck’s constant from entropy-based models</td>
+						<td>Yes</td>
+						<td>✓</td>
+					</tr>
+					<tr>
+						<td>Mass and Coupling Scale Projection</td>
+						<td><code>mass_and_g_projection.py</code></td>
+						<td>Projection of \( G \) and mass units from entropy scales and Hessian determinants</td>
+						<td>Yes</td>
+						<td>✓</td>
+					</tr>
+				</table>
+				<p>
+					All source code is available in the project repository, with dependencies including NumPy, Matplotlib, and SymPy. Refer to the repository documentation for setup and usage instructions. All methods are marked as valid, indicating their applicability to current research contexts as of the document’s publication.
+				</p>
+				<h4>Glossary</h4>
+				<p><strong>Key Terms and Definitions:</strong></p>
+				<ul>
+					<li><strong>Renormalization Group (RG) Flow</strong>: A method to study how physical parameters, such as coupling constants, evolve with energy scale, often modeled using differential equations.</li>
+					<li><strong>Lie Algebra</strong>: A mathematical structure underlying continuous symmetries, used to represent gauge groups like SU(3) in particle physics.</li>
+					<li><strong>Hessian Matrix</strong>: A matrix of second derivatives of a function (e.g., entropy field), used to analyze curvature and stability in physical systems.</li>
+					<li><strong>Entropieprojektion</strong>: A technique to map entropy gradients or fluctuations onto physical quantities, such as masses or gravitational effects, to model emergent phenomena.</li>
+					<li><strong>Lagrangedichte</strong>: A scalar function describing the dynamics of a physical system, used in field theory to derive equations of motion via the action principle.</li>
+				</ul>
 			</section>
 		</main>
 		<footer>
