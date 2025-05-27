@@ -5,5 +5,7 @@ In modern theoretical physics and applied numerical modeling, there is a growing
 This work presents a curated set of numerically implemented algorithms that were originally developed within a generalized framework but are intentionally abstracted to support a wide range of independent applications. These tools include renormalization group solvers, topological invariant analysis, Lie algebra decompositions, entropy-based field inspection, and more.
 
 The goal is to provide a consistent, domain-agnostic toolbox for researchers aiming to conduct symbolic or numerical investigations into physical structure, parameter flow, and field behavior — without requiring alignment with any specific theoretical ontology.
+
 ---
+
 https://tz-dev.github.io/UAC_Methods/
