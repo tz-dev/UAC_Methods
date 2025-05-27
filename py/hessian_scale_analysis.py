@@ -12,23 +12,36 @@
 # - Visualize 2D slices at mid-plane and mean entropy evolution
 # - Compute 3D Hessian matrix of entropy at global max position, eigenvalues
 # - Compute 4D Hessian including meta-time dimension, eigenvalues
+# Input:
+# - Nx - Nz, #meta-time steps, time resolution dx & dtau, diffusion coeff. D, source threshold and grid size
 # =============================================================================
 
-import numpy as np
-import matplotlib.pyplot as plt
+# Interaktive Eingaben
+print("=== Hessian Scale Analysis Configuration ===")
+try:
+    Nx = int(input("Enter grid size Nx [default 50]: ") or 50)
+    Ny = int(input("Enter grid size Ny [default 50]: ") or 50)
+    Nz = int(input("Enter grid size Nz [default 50]: ") or 50)
+    Ntau = int(input("Enter number of meta-time steps Ntau [default 600]: ") or 600)
+    dx = float(input("Enter spatial resolution dx [default 0.1]: ") or 0.1)
+    dtau = float(input("Enter meta-time resolution dtau [default 0.01]: ") or 0.01)
+    D = float(input("Enter diffusion coefficient D [default 0.02]: ") or 0.02)
+    threshold = float(input("Enter source threshold [default 0.04]: ") or 0.04)
+    if Nx <= 0 or Ny <= 0 or Nz <= 0 or Ntau <= 0 or dx <= 0 or dtau <= 0 or D < 0:
+        raise ValueError("Grid sizes, steps, and diffusion must be positive.")
+    if Nx > 100 or Ny > 100 or Nz > 100 or Ntau > 1000:
+        raise ValueError("Grid sizes or Ntau too large for performance.")
+except ValueError as e:
+    print(f"Invalid input: {e}. Using default values.")
+    Nx, Ny, Nz = 50, 50, 50
+    Ntau = 600
+    dx = dtau = 0.1
+    D = 0.02
+    threshold = 0.04
 
-# --- Parameters ---
-Nx, Ny, Nz = 50, 50, 50
-Ntau = 600
-dx = dy = dz = 0.1
-dtau = 0.01
-
-# --- Simulation: Entropy field ---
+# Simulation: Entropy field
 S = np.zeros((Nx, Ny, Nz, Ntau))
 S[..., 0] = 0.5 + 0.15 * np.random.randn(Nx, Ny, Nz)
-
-D = 0.02
-threshold = 0.04
 
 for t in range(1, Ntau):
     laplacian_S = (
@@ -44,7 +57,7 @@ for t in range(1, Ntau):
     source = 0.5 * np.tanh(20 * (grad_magnitude - threshold)) * (grad_magnitude > threshold)
     S[..., t] = S[..., t-1] + dtau * (D * laplacian_S + source)
 
-# --- Statistics ---
+# Statistics
 time_steps = [0, Ntau//4, Ntau//2, 3*Ntau//4, Ntau-1]
 print("Statistical Summary at Selected τ:")
 for t in time_steps:
@@ -70,7 +83,7 @@ for i, t in enumerate(time_steps):
     axes[i].axis('off')
 fig.colorbar(im, ax=axes.ravel().tolist(), shrink=0.6, label='Entropy S')
 plt.suptitle('2D Mid-Plane Entropy Slices (Aggressive Nonlinear Dynamics)', fontsize=14)
-plt.savefig('entropy_slices.png')
+plt.savefig('img/entropy_slices.png')
 plt.show()
 
 mean_entropy = np.mean(S, axis=(0, 1, 2))
@@ -80,7 +93,7 @@ plt.xlabel('Meta-Time τ')
 plt.ylabel('Average Entropy ⟨S⟩')
 plt.title('Mean Entropy Evolution with Enhanced Nonlinearity')
 plt.grid(True)
-plt.savefig('mean_entropy_evolution.png')
+plt.savefig('img/mean_entropy_evolution.png')
 plt.show()
 
 # --- 3D Hessian at global maximum (with boundary check) ---

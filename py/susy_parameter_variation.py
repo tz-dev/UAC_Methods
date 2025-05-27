@@ -6,57 +6,53 @@
 #   - ω = π (projection frequency)
 #   - θ = π/4 (phase offset)
 #   - Base mass = electron mass
-# Output:
+# Inputs:
+# - alpha_S: Scaling factor (default: 0.1)
+# - omega: Frequency parameter (default: 0.5)
+# - theta: Phase parameter (default: 0.0)
+# - N: Number of samples (default: 10000)# Output:
 #   - Mass histograms and projection states
 # ========================================================
-
 import numpy as np
 import matplotlib.pyplot as plt
 
-S_mean = 2.74309
-S_sigma = 0.05894
-k_B = 1.380649e-23
-c = 2.99792458e8
-alpha_S = 0.015
-omega = 3.14159
-theta = np.pi / 4
-m_base = 9.10938356e-31
+# Interactive Inputs
+print("=== SUSY Parameter Variation Configuration ===")
+try:
+    alpha_S = float(input("Enter scaling factor alpha_S [default 0.1]: ") or 0.1)
+    omega = float(input("Enter frequency omega [default 0.5]: ") or 0.5)
+    theta = float(input("Enter phase theta [default 0.0]: ") or 0.0)
+    N = int(input("Enter number of samples N [default 10000]: ") or 10000)
+    if alpha_S <= 0 or omega <= 0 or N <= 0:
+        raise ValueError("alpha_S, omega, and N must be positive.")
+    if N > 100000:
+        raise ValueError("N too large for performance.")
+except ValueError as e:
+    print(f"Invalid input: {e}. Using default values.")
+    alpha_S = 0.1
+    omega = 0.5
+    theta = 0.0
+    N = 10000
 
-N = 10000
 np.random.seed(42)
-S = np.random.normal(S_mean, S_sigma, N)
+m0 = 1e-27  # Reference mass (kg)
+S = np.random.normal(loc=0, scale=1, size=N)
+delta_m = alpha_S * m0 * np.sin(omega * S + theta)
 
-projection_mask = np.sign(np.cos(omega * S + theta))
+m_susy = m0 + delta_m
+m_susy_mean = np.mean(m_susy)
+m_susy_std = np.std(m_susy)
 
-dS = np.random.normal(0, S_sigma, N)
-delta_E = alpha_S * np.abs(dS) * k_B
-delta_m = delta_E / c**2
+print("=== SUSY Mass Splitting Results ===")
+print(f"Mean SUSY mass: {m_susy_mean:.8e} kg")
+print(f"Mass standard deviation: {m_susy_std:.8e} kg")
 
-m_SM = m_base + delta_m
-m_SUSY = m_base - delta_m
-visible = np.where(projection_mask > 0, m_SM, m_SUSY)
-hidden = np.where(projection_mask < 0, m_SM, m_SUSY)
-
-print("=== Supersymmetric Projection Results ===")
-print(f"Mean mass (visible): {np.mean(visible):.5e} kg")
-print(f"Mean mass (hidden):  {np.mean(hidden):.5e} kg")
-print(f"Mean Δm (split):      {np.mean(delta_m):.5e} kg")
-
-plt.figure(figsize=(10, 6))
-plt.hist(m_SM, bins=60, alpha=0.6, label='m_SM', color='blue')
-plt.hist(m_SUSY, bins=60, alpha=0.6, label='m_SUSY', color='orange')
-plt.title('Entropic SUSY Mass Splitting')
+plt.figure(figsize=(8, 6))
+plt.hist(m_susy, bins=50, color='purple', alpha=0.7)
+plt.axvline(m_susy_mean, color='red', linestyle='--', label=f'Mean = {m_susy_mean:.2e}')
+plt.title('SUSY Mass Splitting Distribution')
 plt.xlabel('Mass (kg)')
 plt.ylabel('Frequency')
 plt.legend()
-plt.savefig('img/c2_3_supersym_mass_histogram.png')
-plt.close()
-
-plt.figure(figsize=(10, 5))
-plt.plot(S[:300], projection_mask[:300], 'k.', alpha=0.7)
-plt.title('Projection State vs. Entropy Sample')
-plt.xlabel('Sample Index')
-plt.ylabel('Projection State (±1)')
-plt.grid(True)
-plt.savefig('img/c2_3_supersym_projection_mask.png')
+plt.savefig('img/c7_2_susy_mass_splitting.png')
 plt.close()

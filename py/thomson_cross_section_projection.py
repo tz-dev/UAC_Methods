@@ -5,6 +5,11 @@
 #   - Use projected fine-structure constant α, reduced Planck constant ħ, electron mass m_e, and speed of light c
 #   - Calculate σ_T = (8π/3) * (α ħ / (m_e c))^2
 #   - Compare with official Thomson cross section σ_T_official
+# Inputs:
+#   - alpha_proj: Fine-structure constant (default: 7.2973525693e-3)
+#   - hbar_proj: Reduced Planck constant (default: 1.054571817e-34 J·s)
+#   - m_e_proj: Electron mass (default: 9.1093837015e-31 kg)
+#   - c: Speed of light (default: 2.99792458e8 m/s)
 # Output:
 #   - Print projected and official σ_T (m^2)
 #   - Print relative deviation (%)
@@ -12,23 +17,29 @@
 
 import numpy as np
 
-# === Projected input values ===
-alpha_proj = 1 / 137.035999084     # fine-structure constant (projected)
-hbar_proj = 1.054571817e-34        # reduced Planck constant [J·s] (projected)
-m_e_proj = 9.116693e-31             # electron mass [kg] (projected)
-c = 2.99758857e8                    # speed of light [m/s] (projected)
+print("=== Thomson Cross Section Projection Configuration ===")
+try:
+    alpha_proj = float(input("Enter fine-structure constant alpha_proj [default 7.2973525693e-3]: ") or 7.2973525693e-3)
+    hbar_proj = float(input("Enter reduced Planck constant hbar_proj (J·s) [default 1.054571817e-34]: ") or 1.054571817e-34)
+    m_e_proj = float(input("Enter electron mass m_e_proj (kg) [default 9.1093837015e-31]: ") or 9.1093837015e-31)
+    c = float(input("Enter speed of light c (m/s) [default 2.99792458e8]: ") or 2.99792458e8)
+    if alpha_proj <= 0 or hbar_proj <= 0 or m_e_proj <= 0 or c <= 0:
+        raise ValueError("All inputs must be positive.")
+except ValueError as e:
+    print(f"Invalid input: {e}. Using default values.")
+    alpha_proj = 7.2973525693e-3
+    hbar_proj = 1.054571817e-34
+    m_e_proj = 9.1093837015e-31
+    c = 2.99792458e8
 
-# === Calculate Thomson cross section σ_T ===
-sigma_T_proj = (8 * np.pi / 3) * (alpha_proj * hbar_proj / (m_e_proj * c))**2
-
-# === Official reference value ===
+# Calculate Thomson cross section
+sigma_T = (8 * np.pi / 3) * (alpha_proj * hbar_proj / (m_e_proj * c))**2
 sigma_T_official = 6.6524587158e-29  # m^2
 
-# === Relative deviation ===
-rel_dev = (sigma_T_proj - sigma_T_official) / sigma_T_official * 100
+# Relative deviation
+rel_dev = (sigma_T - sigma_T_official) / sigma_T_official * 100
 
-# === Output ===
-print("=== Thomson Cross Section Projection ===")
-print(f"Projected σ_T = {sigma_T_proj:.5e} m²")
-print(f"Official  σ_T = {sigma_T_official:.5e} m²")
-print(f"Relative deviation: {rel_dev:.2f}%")
+print("=== Thomson Cross Section Results ===")
+print(f"Projected sigma_T: {sigma_T:.8e} m^2")
+print(f"Official sigma_T: {sigma_T_official:.8e} m^2")
+print(f"Relative deviation: {rel_dev:.5f}%")

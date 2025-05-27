@@ -2,72 +2,59 @@
 # File        : lagrangian_density_simulation.py
 # Purpose     : Simulate local Lagrangian values from entropy field statistics.
 #               Evaluate energy scale and stability under entropic potential.
+# Inputs      :
+# - S_mean: Mean entropy value (default: 2.74309)
+# - S_sigma: Entropy standard deviation (default: 0.05894)
+# - N: Number of samples (default: 1000)
+# - repeats: Number of simulation repeats (default: 500)
+# - kappa: Scaling factor (default: 6.5244e34 J/m)
 # =============================================================================
 
 import numpy as np
 import matplotlib.pyplot as plt
 
-# === Constants from previous sections (C.1.1–C.1.4) ===
-S_mean = 2.74309
-S_sigma = 0.05894
-k_B = 1.380649e-23
-hbar = 1.054571817e-34
-G = 6.67430e-11
-l_meta = 1.616e-35
-tau_meta = 5.391e-44
-c = 2.99792458e8
-m_meta = hbar / (l_meta * c)
 
-# === Simulation parameters ===
-N = 10000
-repeats = 10
-
-# === Storage arrays ===
-L_means, L_sigmas, L_mins, L_maxs, stabilities = [], [], [], [], []
-
-for run in range(repeats):
-    S_i = np.random.normal(S_mean * k_B, S_sigma * k_B, N)
-    S_0 = S_mean * k_B
-
-    kinetic = 0.5 * hbar / tau_meta
-    V_base = hbar**2 / (m_meta * l_meta**2)
-    kappa = 7.792e4
-    V = -V_base * (S_i / S_0) * kappa
-    L_i = kinetic + np.abs(V)
-
-    L_means.append(np.mean(L_i))
-    L_sigmas.append(np.std(L_i))
-    L_mins.append(np.min(L_i))
-    L_maxs.append(np.max(L_i))
-
-    residuals = np.abs(np.diff(L_i)) / np.mean(L_i)
-    stabilities.append(np.mean(residuals) * 100 * 0.24)
-
-# === Aggregate statistics ===
-print("=== Aggregated Lagrangian Statistics ===")
-print(f"Lagrangian: mean = {np.mean(L_means):.5e}, sigma = {np.mean(L_sigmas):.5e}, min = {np.mean(L_mins):.5e}, max = {np.mean(L_maxs):.5e} J")
-print(f"Stability deviation (avg over {repeats} runs): {np.mean(stabilities):.4f}%")
-
-# === Plot from last run ===
+# Interactive input
+print("=== Lagrangian Density Simulation Configuration ===")
 try:
-    plt.figure(figsize=(8, 6))
-    plt.hist(L_i, bins=50, density=True, alpha=0.7, color='blue')
-    plt.title('Lagrangian Distribution (Last Run)')
-    plt.xlabel(r'$\mathcal{L}_i$ (J)')
-    plt.ylabel('Density')
-    plt.savefig('img/c2_1_discrete_lagrangian_simulation_lagrangian_distribution.png')
-    plt.close()
+    S_mean = float(input("Enter mean entropy S_mean [default 2.74309]: ") or 2.74309)
+    S_sigma = float(input("Enter entropy standard deviation S_sigma [default 0.05894]: ") or 0.05894)
+    N = int(input("Enter number of samples N [default 1000]: ") or 1000)
+    repeats = int(input("Enter number of repeats [default 500]: ") or 500)
+    kappa = float(input("Enter scaling factor kappa (J/m) [default 6.5244e34]: ") or 6.5244e34)
+    if S_sigma <= 0 or N <= 0 or repeats <= 0 or kappa <= 0:
+        raise ValueError("S_sigma, N, repeats, and kappa must be positive.")
+    if N > 10000 or repeats > 1000:
+        raise ValueError("N or repeats too large for performance.")
 except ValueError as e:
-    print(f"Error plotting histogram: {e}")
+    print(f"Invalid input: {e}. Using default values.")
+    S_mean = 2.74309
+    S_sigma = 0.05894
+    N = 1000
+    repeats = 500
+    kappa = 6.5244e34
 
-try:
-    plt.figure(figsize=(8, 6))
-    plt.plot(np.cumsum(L_i * tau_meta)[:100], label='Action Convergence (Last Run)')
-    plt.title('Action Convergence')
-    plt.xlabel('Step')
-    plt.ylabel(r'$\mathcal{A}$ (J·s)')
-    plt.legend()
-    plt.savefig('img/c2_1_discrete_lagrangian_simulation_action_convergence.png')
-    plt.close()
-except ValueError as e:
-    print(f"Error plotting action convergence: {e}")
+np.random.seed(42)
+L_values = np.zeros(repeats)
+
+for i in range(repeats):
+    S = np.random.normal(loc=S_mean, scale=S_sigma, size=N)
+    grad_S = np.random.normal(loc=0, scale=S_sigma, size=(N, 4))
+    grad_norm = np.linalg.norm(grad_S, axis=1)
+    L = kappa * np.mean(S * grad_norm)
+    L_values[i] = L
+
+L_mean = np.mean(L_values)
+L_std = np.std(L_values)
+print(f"Mean Lagrangian density: {L_mean:.8e} J/m^3")
+print(f"Standard deviation: {L_std:.8e} J/m^3")
+
+plt.figure(figsize=(8, 6))
+plt.hist(L_values, bins=50, color='teal', alpha=0.7)
+plt.axvline(L_mean, color='red', linestyle='--', label=f'Mean = {L_mean:.2e}')
+plt.title('Distribution of Lagrangian Density')
+plt.xlabel('Lagrangian density (J/m^3)')
+plt.ylabel('Frequency')
+plt.legend()
+plt.savefig('img/lagrangian_density_simulation.png')
+plt.close()

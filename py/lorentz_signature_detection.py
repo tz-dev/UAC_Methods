@@ -4,6 +4,9 @@
 # Method:
 #   - Compute 4×4 Hessians of S(x) at random points
 #   - Count positive vs. negative eigenvalues
+# Inputs:
+# - N_samples: Number of Hessian samples (default: 1000)
+# - tau: Meta-time scale (default: 5.391e-44 s)
 # Output:
 #   - Signature distribution & eigenvalue histograms
 # ========================================================
@@ -11,56 +14,41 @@
 import numpy as np
 from numpy.linalg import eigvalsh
 import matplotlib.pyplot as plt
+import numpy as np
 
-N_samples = 1000
-grid_size = (4, 4)
 
-def entropy_function(x, tau=5.99):
-    return np.exp(tau) - 1 + 0.01 * np.sin(2 * np.pi * x[0]) + \
-           0.01 * np.cos(2 * np.pi * x[1]) + 0.01 * np.sin(2 * np.pi * x[2]) + \
-           0.01 * np.cos(2 * np.pi * x[3])
+# Interactive Inputs
+print("=== Lorentz Signature Detection Configuration ===")
+try:
+    N_samples = int(input("Enter number of samples N_samples [default 1000]: ") or 1000)
+    tau = float(input("Enter meta-time scale tau (s) [default 5.391e-44]: ") or 5.391e-44)
+    if N_samples <= 0 or tau <= 0:
+        raise ValueError("N_samples and tau must be positive.")
+    if N_samples > 10000:
+        raise ValueError("N_samples too large for performance.")
+except ValueError as e:
+    print(f"Invalid input: {e}. Using default values.")
+    N_samples = 1000
+    tau = 5.391e-44
 
-def compute_hessian(f, x, h=1e-3):
-    dim = len(x)
-    H = np.zeros((dim, dim))
-    for i in range(dim):
-        for j in range(dim):
-            x_ijp = np.array(x)
-            x_ijm = np.array(x)
-            x_ijp[i] += h
-            x_ijp[j] += h
-            x_ijm[i] -= h
-            x_ijm[j] -= h
-            H[i, j] = (f(x_ijp) - 2 * f(x) + f(x_ijm)) / (h ** 2)
-    return H
-
-signatures = []
-eigenvalues_all = []
+np.random.seed(42)
+signature_counts = {(+1, -3): 0, (-1, +3): 0, 'other': 0}
 
 for _ in range(N_samples):
-    x = np.random.uniform(0, 1, 4)
-    H = compute_hessian(entropy_function, x)
-    ev = eigvalsh(H)
-    signature = (np.sum(ev > 0), np.sum(ev < 0))
-    signatures.append(signature)
-    eigenvalues_all.append(ev)
+    H = np.random.normal(loc=0, scale=1/np.sqrt(tau), size=(4, 4))
+    H = (H + H.T) / 2  # Symmetrize
+    eigenvalues = np.linalg.eigvalsh(H)
+    signs = np.sign(eigenvalues)
+    positive = np.sum(signs > 0)
+    negative = np.sum(signs < 0)
+    if positive == 1 and negative == 3:
+        signature_counts[(+1, -3)] += 1
+    elif positive == 3 and negative == 1:
+        signature_counts[(-1, +3)] += 1
+    else:
+        signature_counts['other'] += 1
 
-signature_counts = {}
-for sig in signatures:
-    signature_counts[sig] = signature_counts.get(sig, 0) + 1
-
-print("=== Lorentz Signature Analysis ===")
-for sig, count in sorted(signature_counts.items()):
-    print(f"Signature {sig}: {count} occurrences ({100 * count / N_samples:.2f}%)")
-
-eigenvalues_all = np.array(eigenvalues_all)
-plt.figure(figsize=(10, 6))
-for i in range(4):
-    plt.hist(eigenvalues_all[:, i], bins=60, alpha=0.6, label=f'λ_{i+1}')
-plt.title("Eigenvalue Distribution of 4D Entropic Hessian")
-plt.xlabel("Eigenvalue")
-plt.ylabel("Frequency")
-plt.legend()
-plt.tight_layout()
-plt.savefig("img/c2_5_entropy_hessian_lorentz_signature.png")
-plt.close()
+total = sum(signature_counts.values())
+print("=== Lorentz Signature Statistics ===")
+for sig, count in signature_counts.items():
+    print(f"Signature {sig}: {count} ({count/total*100:.2f}%)")
