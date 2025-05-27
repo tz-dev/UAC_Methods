@@ -521,41 +521,98 @@
 				<ul>
 					<li><a href="py/lagrangian_density_simulation.py"><code>lagrangian_density_simulation.py</code></a></li>
 				</ul>
-				<h4>2.5.2 Yang-Mills Field Dynamics</h4>
-				<p>
-					This method simulates SU(2)-like Yang-Mills field dynamics using an entropy-derived gauge field \( A^a_\mu \). The field strength tensor \( F^a_{\mu\nu} \) is computed for a gauge coupling \( g = 0.65 \) and field scale \( \kappa = \frac{\hbar}{l_{\text{meta}}} \), where \( \hbar = 1.054571817 \times 10^{-34} \,\text{J·s} \) and \( l_{\text{meta}} = 1.616 \times 10^{-35} \,\text{m} \). The entropy field is sampled with \( N = 1,000 \) points from a normal distribution with mean \( S_{\text{mean}} = 2.74309 \) and standard deviation \( S_{\sigma} = 0.05894 \).
-				</p>
-				<p style="text-align: center;">
-					\( F^a_{\mu\nu} = \partial_\mu A^a_\nu - \partial_\nu A^a_\mu + g \sum_{b,c} f_{abc} A^b_\mu A^c_\nu \)
-				</p>
-				<p>
-					where \( f_{abc} \) is the structure constant, approximated as \( f_{abc} = \frac{(a - b)(b - c)(c - a)}{2} \). The energy density for each color index \( a \) is computed as:
-				</p>
-				<p style="text-align: center;">
-					\( \rho^a = \sum_{i=1}^3 (F^a_{0i})^2 - \frac{1}{4} \sum_{\mu<\nu} (F^a_{\mu\nu})^2 \)
-				</p>
-				<p>
-					This energy density reflects the contributions of the electric and magnetic components of the field, providing insight into the dynamics of the SU(2)-like gauge field.
-				</p>
-				<p><strong>Features:</strong></p>
-				<ul>
-					<li>Simulation of SU(2)-like gauge field dynamics with entropy-derived fields</li>
-					<li>Computation of field strength tensor with nonlinear gauge interactions</li>
-					<li>Energy density analysis across three color indices</li>
-				</ul>
-				<p><strong>Interactive Features:</strong></p>
-				<ul>
-				  <li>Allows user input for mean entropy (<code>S_mean</code>), entropy standard deviation (<code>S_sigma</code>), and number of samples (<code>N</code>) to simulate Yang-Mills field dynamics. Default values: <code>S_mean = 2.74309</code>, <code>S_sigma = 0.05894</code>, <code>N = 1000</code>.</li>
-				</ul>
-				<p><strong>Output:</strong></p>
-				<ul>
-					<li>Printed mean energy density for each color index, e.g., \( 3.44012 \times 10^{-2} \,\text{J/m}^3 \) (color 0), \( 3.65700 \times 10^{-2} \,\text{J/m}^3 \) (color 1), \( 3.60013 \times 10^{-2} \,\text{J/m}^3 \) (color 2)</li>
-					<li>Energy density histogram saved as: <code>img/c2_4_yangmills_energy_density_histogram.png</code></li>
-				</ul>
-				<p><strong>File:</strong></p>
-				<ul>
-					<li><a href="py/yang_mills_field_dynamics.py"><code>yang_mills_field_dynamics.py</code></a></li>
-				</ul>
+			<h4>2.5.2 Yang-Mills Field Dynamics</h4>
+			<p>
+				This method simulates the dynamics of a Yang-Mills gauge field with SU(2)-like structure, based on an entropy-derived gauge potential \( A^a_\mu \). The corresponding field strength tensor \( F^a_{\mu\nu} \) is calculated using a fixed gauge coupling \( g = 0.65 \) and a field scale \( \kappa = \frac{\hbar}{l_{\text{meta}}} \), where \( \hbar = 1.054571817 \times 10^{-34} \,\text{J·s} \) and \( l_{\text{meta}} = 1.616 \times 10^{-35} \,\text{m} \).
+			</p>
+			<p>
+				The entropy field is sampled with \( N = 1{,}000 \) values drawn from a normal distribution with mean \( S_{\text{mean}} = 2.74309 \) and standard deviation \( S_{\sigma} = 0.05894 \). The non-Abelian field strength is computed via:
+			</p>
+			<p style="text-align: center;">
+				\( F^a_{\mu\nu} = \partial_\mu A^a_\nu - \partial_\nu A^a_\mu + g \sum_{b,c} f_{abc} A^b_\mu A^c_\nu \)
+			</p>
+			<p>
+				where \( f_{abc} \) denotes the SU(2)-like structure constants, approximated by \( f_{abc} = \frac{(a - b)(b - c)(c - a)}{2} \). The energy density associated with each color index \( a \) is then evaluated as:
+			</p>
+			<p style="text-align: center;">
+				\( \rho^a = \sum_{i=1}^3 (F^a_{0i})^2 - \frac{1}{4} \sum_{\mu<\nu} (F^a_{\mu\nu})^2 \)
+			</p>
+			<p>
+				This expression captures both electric and magnetic components of the field, offering insights into the local energy contributions of the gauge dynamics across the three color directions.
+			</p>
+
+			<p><strong>Features:</strong></p>
+			<ul>
+				<li>Simulation of SU(2)-like gauge field dynamics using entropy-derived input fields</li>
+				<li>Computation of the nonlinear field strength tensor incorporating structure constants</li>
+				<li>Energy density analysis resolved by color index (a = 0, 1, 2)</li>
+			</ul>
+
+			<p><strong>Interactive Features:</strong></p>
+			<ul>
+				<li>Users can specify mean entropy (<code>S_mean</code>), standard deviation (<code>S_sigma</code>), and number of samples (<code>N</code>) to generate customized entropy fields. Default values: <code>S_mean = 2.74309</code>, <code>S_sigma = 0.05894</code>, <code>N = 1000</code>.</li>
+			</ul>
+
+			<p><strong>Output:</strong></p>
+			<ul>
+				<li>Computed mean energy density per color index, e.g.:<br>
+					\( \rho^0 = 3.44012 \times 10^{-2} \,\text{J/m}^3 \),<br>
+					\( \rho^1 = 3.65700 \times 10^{-2} \,\text{J/m}^3 \),<br>
+					\( \rho^2 = 3.60013 \times 10^{-2} \,\text{J/m}^3 \)</li>
+				<li>Histogram of the energy density distribution saved as: <code>img/c2_4_yangmills_energy_density_histogram.png</code></li>
+			</ul>
+
+			<p><strong>File:</strong></p>
+			<ul>
+				<li><a href="py/yang_mills_field_dynamics.py"><code>yang_mills_field_dynamics.py</code></a></li>
+			</ul>
+
+			<h4>2.5.2 Yang-Mills Field Dynamics</h4>
+			<p>
+				This method simulates the dynamics of a Yang-Mills gauge field with SU(2)-like structure, based on an entropy-derived gauge potential \( A^a_\mu \). The corresponding field strength tensor \( F^a_{\mu\nu} \) is calculated using a fixed gauge coupling \( g = 0.65 \) and a field scale \( \kappa = \frac{\hbar}{l_{\text{meta}}} \), where \( \hbar = 1.054571817 \times 10^{-34} \,\text{J·s} \) and \( l_{\text{meta}} = 1.616 \times 10^{-35} \,\text{m} \).
+			</p>
+			<p>
+				The entropy field is sampled with \( N = 1{,}000 \) values drawn from a normal distribution with mean \( S_{\text{mean}} = 2.74309 \) and standard deviation \( S_{\sigma} = 0.05894 \). The non-Abelian field strength is computed via:
+			</p>
+			<p style="text-align: center;">
+				\( F^a_{\mu\nu} = \partial_\mu A^a_\nu - \partial_\nu A^a_\mu + g \sum_{b,c} f_{abc} A^b_\mu A^c_\nu \)
+			</p>
+			<p>
+				where \( f_{abc} \) denotes the SU(2)-like structure constants, approximated by \( f_{abc} = \frac{(a - b)(b - c)(c - a)}{2} \). The energy density associated with each color index \( a \) is then evaluated as:
+			</p>
+			<p style="text-align: center;">
+				\( \rho^a = \sum_{i=1}^3 (F^a_{0i})^2 - \frac{1}{4} \sum_{\mu<\nu} (F^a_{\mu\nu})^2 \)
+			</p>
+			<p>
+				This expression captures both electric and magnetic components of the field, offering insights into the local energy contributions of the gauge dynamics across the three color directions.
+			</p>
+
+			<p><strong>Features:</strong></p>
+			<ul>
+				<li>Simulation of SU(2)-like gauge field dynamics using entropy-derived input fields</li>
+				<li>Computation of the nonlinear field strength tensor incorporating structure constants</li>
+				<li>Energy density analysis resolved by color index (a = 0, 1, 2)</li>
+			</ul>
+
+			<p><strong>Interactive Features:</strong></p>
+			<ul>
+				<li>Users can specify mean entropy (<code>S_mean</code>), standard deviation (<code>S_sigma</code>), and number of samples (<code>N</code>) to generate customized entropy fields. Default values: <code>S_mean = 2.74309</code>, <code>S_sigma = 0.05894</code>, <code>N = 1000</code>.</li>
+			</ul>
+
+			<p><strong>Output:</strong></p>
+			<ul>
+				<li>Computed mean energy density per color index, e.g.:<br>
+					\( \rho^0 = 3.44012 \times 10^{-2} \,\text{J/m}^3 \),<br>
+					\( \rho^1 = 3.65700 \times 10^{-2} \,\text{J/m}^3 \),<br>
+					\( \rho^2 = 3.60013 \times 10^{-2} \,\text{J/m}^3 \)</li>
+				<li>Histogram of the energy density distribution saved as: <code>img/c2_4_yangmills_energy_density_histogram.png</code></li>
+			</ul>
+
+			<p><strong>File:</strong></p>
+			<ul>
+				<li><a href="py/yang_mills_field_dynamics.py"><code>yang_mills_field_dynamics.py</code></a></li>
+			</ul>
+
 			</section>
 			<h2>2.6 Gradient and Entropy-Based Analysis</h2>
 			<section id="gradient-entropy-analysis">
